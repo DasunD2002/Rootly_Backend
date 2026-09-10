@@ -1,7 +1,6 @@
 package com.backend.rootly.config;
 
 import com.backend.rootly.filter.JwtAuthenticationFilter;
-import com.backend.rootly.utility.EndPoint;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +38,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    @org.springframework.core.annotation.Order(2)
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -54,11 +52,10 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/**",
-                                "/api/v1/auth/**",
-                                EndPoint.API + EndPoint.EXPLORE_PATH_PATTERN,
-                                EndPoint.API + EndPoint.EXPLORE_PLACES,
-                                EndPoint.API + EndPoint.EXPLORE_CATEGORIES
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/register"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
