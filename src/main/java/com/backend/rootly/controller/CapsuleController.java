@@ -36,6 +36,8 @@ import java.util.Locale;
 @Log4j2
 public class CapsuleController {
 
+    private static final String ACCEPT_LANGUAGE = "Accept-Language";
+
     private final CapsuleService capsuleService;
     private final ModelMapper modelMapper;
 
@@ -43,7 +45,7 @@ public class CapsuleController {
     public ResponseEntity<Object> createCapsule(
             @AuthenticationPrincipal UserReg user,
             @Validated @RequestBody CreateCapsuleRequestDTO requestDTO,
-            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+            @RequestHeader(value = ACCEPT_LANGUAGE, required = false) Locale locale) {
         if (log.isDebugEnabled()) {
             log.debug("Received Create Capsule request");
         }
@@ -62,7 +64,7 @@ public class CapsuleController {
     public ResponseEntity<Object> getCapsuleDetail(
             @PathVariable String capsuleId,
             @AuthenticationPrincipal UserReg user,
-            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+            @RequestHeader(value = ACCEPT_LANGUAGE, required = false) Locale locale) {
         String requesterId = user != null ? user.getId() : null;
         if (log.isDebugEnabled()) {
             log.debug("Received Get Capsule Detail request for id: {}", capsuleId);
@@ -79,7 +81,7 @@ public class CapsuleController {
             @PathVariable String capsuleId,
             @AuthenticationPrincipal UserReg user,
             @RequestBody UpdateCapsuleRequestDTO requestDTO,
-            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+            @RequestHeader(value = ACCEPT_LANGUAGE, required = false) Locale locale) {
         String requesterId = user != null ? user.getId() : null;
         if (log.isDebugEnabled()) {
             log.debug("Received Update Capsule request for id: {}", capsuleId);
@@ -95,7 +97,7 @@ public class CapsuleController {
     public ResponseEntity<Object> deleteCapsule(
             @PathVariable String capsuleId,
             @AuthenticationPrincipal UserReg user,
-            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+            @RequestHeader(value = ACCEPT_LANGUAGE, required = false) Locale locale) {
         String requesterId = user != null ? user.getId() : null;
         if (log.isDebugEnabled()) {
             log.debug("Received Delete Capsule request for id: {}", capsuleId);
@@ -114,7 +116,7 @@ public class CapsuleController {
             @PathVariable String capsuleId,
             @AuthenticationPrincipal UserReg user,
             @RequestBody InviteRequestDTO requestDTO,
-            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+            @RequestHeader(value = ACCEPT_LANGUAGE, required = false) Locale locale) {
         if (log.isDebugEnabled()) {
             log.debug("Received Invite Contributor request for capsule {}", capsuleId);
         }
@@ -129,7 +131,7 @@ public class CapsuleController {
     public ResponseEntity<Object> joinByInvite(
             @PathVariable String inviteToken,
             @AuthenticationPrincipal UserReg user,
-            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+            @RequestHeader(value = ACCEPT_LANGUAGE, required = false) Locale locale) {
         String userId = user != null ? user.getId() : null;
         if (log.isDebugEnabled()) {
             log.debug("Received Join Capsule request with token: {}", inviteToken);

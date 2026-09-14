@@ -21,7 +21,6 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 @Document(collection = "capsuleEntries")
-@SuppressWarnings("PMD.TooManyFields")
 public class CapsuleEntry {
 
     @Id

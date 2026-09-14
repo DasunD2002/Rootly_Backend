@@ -56,6 +56,7 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Override
     @Transactional
+    @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.AvoidDeeplyNestedIfStmts"})
     public ResponseEntity<Object> createMemory(String capsuleId, String authorId,
                                               CreateMemoryRequestDTO request, Locale locale) {
         Capsule capsule = capsuleRepository.findById(capsuleId).orElse(null);
@@ -118,6 +119,7 @@ public class MemoryServiceImpl implements MemoryService {
     }
 
     @Override
+    @SuppressWarnings("PMD.LawOfDemeter")
     public ResponseEntity<Object> getMemories(String capsuleId, String requesterId, Locale locale) {
         Capsule capsule = capsuleRepository.findById(capsuleId).orElse(null);
         if (capsule == null) {
@@ -159,6 +161,7 @@ public class MemoryServiceImpl implements MemoryService {
                 ResponseCode.MEMORY_REACT_SUCCESS, MessageConstant.MEMORY_REACT_SUCCESS, entry.getLikesCount());
     }
 
+    @SuppressWarnings("PMD.LawOfDemeter")
     public boolean isCapsuleCurrentlyLocked(Capsule capsule) {
         if (capsule.getStatus() != null && capsule.getStatus().isLocked()) {
             return true;

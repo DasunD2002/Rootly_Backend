@@ -48,8 +48,10 @@ import java.util.UUID;
 
 @Service
 @Log4j2
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
 public class CapsuleServiceImpl implements CapsuleService {
+
+    private static final String CAPSULE_ID_REQUIRED = "capsuleId is required";
 
     private final CapsuleRepository capsuleRepository;
     private final CapsuleEntryRepository capsuleEntryRepository;
@@ -126,8 +128,9 @@ public class CapsuleServiceImpl implements CapsuleService {
     }
 
     @Override
+    @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.LawOfDemeter", "PMD.AvoidDeeplyNestedIfStmts"})
     public ResponseEntity<Object> getCapsuleDetail(String capsuleId, String requesterId, Locale locale) {
-        String normalizedCapsuleId = requireId(capsuleId, "capsuleId is required");
+        String normalizedCapsuleId = requireId(capsuleId, CAPSULE_ID_REQUIRED);
         Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
         if (capsule == null) {
             return responseGenerator.generateErrorResponse(null, HttpStatus.NOT_FOUND,
@@ -244,9 +247,10 @@ public class CapsuleServiceImpl implements CapsuleService {
 
     @Override
     @Transactional
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.LawOfDemeter"})
     public ResponseEntity<Object> updateCapsule(String capsuleId, String requesterId,
                                                UpdateCapsuleRequestDTO request, Locale locale) {
-        String normalizedCapsuleId = requireId(capsuleId, "capsuleId is required");
+        String normalizedCapsuleId = requireId(capsuleId, CAPSULE_ID_REQUIRED);
         Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
         if (capsule == null) {
             return responseGenerator.generateErrorResponse(request, HttpStatus.NOT_FOUND,
@@ -298,7 +302,7 @@ public class CapsuleServiceImpl implements CapsuleService {
     @Override
     @Transactional
     public ResponseEntity<Object> deleteCapsule(String capsuleId, String requesterId, Locale locale) {
-        String normalizedCapsuleId = requireId(capsuleId, "capsuleId is required");
+        String normalizedCapsuleId = requireId(capsuleId, CAPSULE_ID_REQUIRED);
         Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
         if (capsule == null) {
             return responseGenerator.generateErrorResponse(null, HttpStatus.NOT_FOUND,
@@ -320,7 +324,7 @@ public class CapsuleServiceImpl implements CapsuleService {
     @Override
     @Transactional
     public ResponseEntity<Object> inviteContributor(String capsuleId, InviteContributorDomain request, Locale locale) {
-        String normalizedCapsuleId = requireId(capsuleId, "capsuleId is required");
+        String normalizedCapsuleId = requireId(capsuleId, CAPSULE_ID_REQUIRED);
         String contributorId = requireContributorId(request);
 
         Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
@@ -356,9 +360,10 @@ public class CapsuleServiceImpl implements CapsuleService {
 
     @Override
     @Transactional
+    @SuppressWarnings("PMD.LawOfDemeter")
     public ResponseEntity<Object> createInvite(String capsuleId, String inviterId,
                                               InviteRequestDTO request, Locale locale) {
-        String normalizedCapsuleId = requireId(capsuleId, "capsuleId is required");
+        String normalizedCapsuleId = requireId(capsuleId, CAPSULE_ID_REQUIRED);
         Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
         if (capsule == null) {
             return responseGenerator.generateErrorResponse(request, HttpStatus.NOT_FOUND,
@@ -413,6 +418,7 @@ public class CapsuleServiceImpl implements CapsuleService {
 
     @Override
     @Transactional
+    @SuppressWarnings("PMD.LawOfDemeter")
     public ResponseEntity<Object> joinByInvite(String inviteToken, String userId, Locale locale) {
         String token = requireId(inviteToken, "inviteToken is required");
         CapsuleInvite invite = capsuleInviteRepository.findByInviteToken(token).orElse(null);

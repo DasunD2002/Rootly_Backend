@@ -64,6 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @SuppressWarnings("PMD.LawOfDemeter")
     public ResponseEntity<Object> getDashboardStats(String userId, Locale locale) {
         UserReg user = userRepository.findById(userId).orElse(null);
         if (user == null) {

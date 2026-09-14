@@ -32,23 +32,34 @@ public class StorageServiceImpl implements StorageService {
         try {
             Files.createDirectories(this.rootLocation);
         } catch (IOException e) {
-            log.error("Could not initialize storage location: {}", e.getMessage(), e);
+            if (log.isErrorEnabled()) {
+                log.error("Could not initialize storage location: {}", e.getMessage(), e);
+            }
         }
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Cannot upload empty file");
+        }
+    }
+
+    private String extractExtension(String filename) {
+        int dotIdx = filename.lastIndexOf('.');
+        return dotIdx >= 0 ? filename.substring(dotIdx) : "";
+    }
+
+    private String buildFileUrl(String storedFileName) {
+        return baseUrl.endsWith("/") ? baseUrl + storedFileName : baseUrl + "/" + storedFileName;
     }
 
     @Override
     public MediaUploadResponseDTO store(MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Cannot upload empty file");
-        }
+        validateFile(file);
 
         String originalFilename = file.getOriginalFilename();
         String cleanOriginalName = originalFilename != null ? Paths.get(originalFilename).getFileName().toString() : "file";
-        String extension = "";
-        int dotIdx = cleanOriginalName.lastIndexOf('.');
-        if (dotIdx >= 0) {
-            extension = cleanOriginalName.substring(dotIdx);
-        }
+        String extension = extractExtension(cleanOriginalName);
 
         String storedFileName = UUID.randomUUID() + extension;
         Path destinationFile = this.rootLocation.resolve(storedFileName).normalize();
@@ -59,7 +70,7 @@ public class StorageServiceImpl implements StorageService {
 
         Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
 
-        String fileUrl = baseUrl.endsWith("/") ? baseUrl + storedFileName : baseUrl + "/" + storedFileName;
+        String fileUrl = buildFileUrl(storedFileName);
 
         if (log.isInfoEnabled()) {
             log.info("File successfully stored: {} -> {}", cleanOriginalName, fileUrl);

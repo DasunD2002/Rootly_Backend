@@ -50,7 +50,9 @@ public class MediaController {
             return responseGenerator.generateSuccessResponse(HttpStatus.CREATED,
                     ResponseCode.MEDIA_UPLOAD_SUCCESS, MessageConstant.MEDIA_UPLOAD_SUCCESS, responseDTO);
         } catch (IOException e) {
-            log.error("Failed to store uploaded file: {}", e.getMessage(), e);
+            if (log.isErrorEnabled()) {
+                log.error("Failed to store uploaded file: {}", e.getMessage(), e);
+            }
             return responseGenerator.generateErrorResponse(null, HttpStatus.INTERNAL_SERVER_ERROR,
                     ResponseCode.INTERNAL_SERVER_ERROR, "Failed to upload file: " + e.getMessage());
         }
@@ -63,7 +65,9 @@ public class MediaController {
         try {
             contentType = Files.probeContentType(Paths.get(file.getURI()));
         } catch (IOException e) {
-            log.warn("Could not determine file content type for {}", filename);
+            if (log.isWarnEnabled()) {
+                log.warn("Could not determine file content type for {}", filename);
+            }
         }
         if (contentType == null) {
             contentType = "application/octet-stream";

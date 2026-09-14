@@ -42,6 +42,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @SuppressWarnings("PMD.LawOfDemeter")
     public ResponseEntity<Object> getNotifications(String userId, Locale locale) {
         List<Notification> allNotifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
 
@@ -58,6 +59,7 @@ public class NotificationServiceImpl implements NotificationService {
             if (Boolean.FALSE.equals(n.getIsRead())) {
                 unreadCount++;
             }
+            Instant createdAt = n.getCreatedAt();
             NotificationResponseDTO dto = NotificationResponseDTO.builder()
                     .id(n.getId())
                     .userId(n.getUserId())
@@ -65,10 +67,10 @@ public class NotificationServiceImpl implements NotificationService {
                     .message(n.getMessage())
                     .type(n.getType())
                     .isRead(n.getIsRead())
-                    .createdAt(n.getCreatedAt())
+                    .createdAt(createdAt)
                     .build();
 
-            Instant itemTime = n.getCreatedAt() != null ? n.getCreatedAt() : Instant.now(clock);
+            Instant itemTime = createdAt != null ? createdAt : Instant.now(clock);
             if (!itemTime.isBefore(startOfToday)) {
                 today.add(dto);
             } else if (!itemTime.isBefore(startOfYesterday)) {

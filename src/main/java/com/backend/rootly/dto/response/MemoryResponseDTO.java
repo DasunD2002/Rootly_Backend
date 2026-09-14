@@ -12,7 +12,6 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@SuppressWarnings("PMD.TooManyFields")
 public class MemoryResponseDTO {
 
     private String id;
