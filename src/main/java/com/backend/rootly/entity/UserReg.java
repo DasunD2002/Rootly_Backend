@@ -78,6 +78,9 @@ public class UserReg {
     @Field("show_activity")
     private Boolean showActivity;
 
+    @Field("subscription_months_left")
+    private Integer subscriptionMonthsLeft;
+
     @CreatedDate
     @Field("created_at")
     private Instant createdAt;

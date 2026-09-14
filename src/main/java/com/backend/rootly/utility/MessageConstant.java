@@ -28,6 +28,19 @@ public class MessageConstant {
     public static final String CAPSULE_INVITE_SUCCESS = "val.capsule.invite.success";
     public static final String CAPSULE_NOT_FOUND = "val.capsule.not.found";
     public static final String CAPSULE_ALREADY_EXISTS = "val.capsule.already.exists";
+    public static final String CAPSULE_UPDATE_SUCCESS = "val.capsule.update.success";
+    public static final String CAPSULE_DELETE_SUCCESS = "val.capsule.delete.success";
+
+    /*--------------- Memory & Media Messages ---------------*/
+    public static final String MEMORY_CREATE_SUCCESS = "val.memory.create.success";
+    public static final String MEMORY_GET_SUCCESS = "val.memory.get.success";
+    public static final String MEMORY_NOT_FOUND = "val.memory.not.found";
+    public static final String MEMORY_REACT_SUCCESS = "val.memory.react.success";
+    public static final String MEDIA_UPLOAD_SUCCESS = "val.media.upload.success";
+
+    /*--------------- Notification Messages ---------------*/
+    public static final String NOTIFICATION_GET_SUCCESS = "val.notification.get.success";
+    public static final String NOTIFICATION_UPDATE_SUCCESS = "val.notification.update.success";
 
     /*--------------- Explore Messages ---------------*/
     public static final String PLACES_UNAVAILABLE = "val.places.unavailable";

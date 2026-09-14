@@ -1,9 +1,6 @@
 # Rootly backend
 
-Spring Boot 4 / Java 17 API for fetching real Sri Lankan heritage places for
-Explore Places. The current endpoint reads Wikidata, not demo records or a
-database. It does not require a paid API key. Flutter integration is a separate
-step; the existing Flutter screens are not modified by this backend change.
+Spring Boot 4 / Java 17 RESTful backend for **Rootly**, a digital time-capsule and family memory-preserving mobile application. Features include Personal, Family, and Community time capsules, multimedia memory contributions (photos, videos, voice notes, written letters), unlock countdown timers with payload encryption/redaction until unlock dates, collaboration invites, and notifications. Also includes Wikidata exploration for Sri Lankan heritage sites.
 
 ## Project structure and conventions
 
@@ -67,7 +64,28 @@ On Linux/macOS use `./mvnw spring-boot:run`. The server listens on port 8080.
 The first places request loads the public catalog and can take several seconds.
 The categories endpoint does not contact the provider.
 
-## Endpoints
+## Core Time Capsule API Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/v1/user/dashboard-stats` | Get vault stats (capsules, memories, months left) and recent capsules | Yes (Bearer) |
+| **POST** | `/api/v1/capsules` | Create capsule (Personal, Family, Community) with unlock date | Yes (Bearer) |
+| **GET** | `/api/v1/capsules/{id}` | Get capsule overview, countdown, contributors, and memories | Yes (Bearer) |
+| **PUT** | `/api/v1/capsules/{id}` | Update capsule settings, title, cover photo, permissions | Yes (Bearer) |
+| **DELETE** | `/api/v1/capsules/{id}` | Delete capsule and all contained entries | Yes (Bearer) |
+| **POST** | `/api/v1/capsules/{id}/memories` | Upload photo, video, voice note, or written letter | Yes (Bearer) |
+| **GET** | `/api/v1/capsules/{id}/memories` | Get memories (protected if locked, revealed if unlocked) | Yes (Bearer) |
+| **POST** | `/api/v1/capsules/{id}/memories/{memoryId}/react` | Like / react to a memory | Yes (Bearer) |
+| **POST** | `/api/v1/media/upload` | Upload media file (multipart) | Yes (Bearer) |
+| **GET** | `/api/v1/media/files/{filename}` | Retrieve / render uploaded media file | No (Public) |
+| **POST** | `/api/v1/capsules/{id}/invite` | Generate invite link or send invite via Email | Yes (Bearer) |
+| **POST** | `/api/v1/capsules/join/{inviteToken}` | Join a collaborative capsule using invite link | Yes (Bearer) |
+| **GET** | `/api/v1/notifications` | Get notifications grouped by Today / Yesterday / Earlier | Yes (Bearer) |
+| **PATCH**| `/api/v1/notifications/mark-read` | Mark specific or all notifications as read | Yes (Bearer) |
+
+> **Lock Security Rule**: When a capsule is locked (`status: "locked"` or current time < `unlockDate`), its memories hide sensitive content (`mediaUrl: null`, `textContent: "[LOCKED - Content protected until unlock date]"` and `isLocked: true`). Once `unlockDate` is reached, the payload is automatically revealed.
+
+## Explore Places Endpoints
 
 ```http
 POST /api/v1/explore/places

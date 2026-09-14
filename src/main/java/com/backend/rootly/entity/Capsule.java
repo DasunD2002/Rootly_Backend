@@ -54,6 +54,9 @@ public class Capsule {
     @Field("privacy")
     private CapsulePrivacy privacy;
 
+    @Field("allowMemberContributions")
+    private Boolean allowMemberContributions;
+
     @Field("sharedWithUserIds")
     private List<String> sharedWithUserIds;
 

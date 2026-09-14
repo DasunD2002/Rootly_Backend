@@ -129,6 +129,15 @@ public class ExceptionHandlerController {
                 ResponseCode.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<Object> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        if (log.isWarnEnabled()) {
+            log.warn("NoResourceFoundException for path '{}': {}", ex.getResourcePath(), ex.getMessage());
+        }
+        return responseGenerator.generateErrorResponse(HttpStatus.NOT_FOUND,
+                ResponseCode.NOT_FOUND, "Resource or endpoint not found: '" + ex.getResourcePath() + "'. Please verify the URL and ensure there are no accidental trailing spaces or typos.");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception ex) {
         log.error("Unhandled Exception: ", ex);

@@ -20,7 +20,6 @@ import java.util.List;
 @Builder
 public class CreateCapsuleRequestDTO {
 
-    @NotBlank(message = "creatorId is required")
     private String creatorId;
 
     @Size(max = 150, message = "title must not exceed 150 characters")

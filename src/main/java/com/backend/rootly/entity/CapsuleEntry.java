@@ -21,6 +21,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 @Document(collection = "capsuleEntries")
+@SuppressWarnings("PMD.TooManyFields")
 public class CapsuleEntry {
 
     @Id
@@ -36,8 +37,26 @@ public class CapsuleEntry {
     @Field("type")
     private CapsuleEntryType type;
 
+    @Field("title")
+    private String title;
+
+    @Field("description")
+    private String description;
+
+    @Field("mediaUrl")
+    private String mediaUrl;
+
+    @Field("textContent")
+    private String textContent;
+
     @Field("content")
     private String content;
+
+    @Field("likesCount")
+    private Integer likesCount;
+
+    @Field("unlockDate")
+    private Instant unlockDate;
 
     @CreatedDate
     @Field("createdAt")
@@ -46,4 +65,12 @@ public class CapsuleEntry {
     @LastModifiedDate
     @Field("updatedAt")
     private Instant updatedAt;
+
+    public String getAuthorId() {
+        return contributorId;
+    }
+
+    public void setAuthorId(String authorId) {
+        this.contributorId = authorId;
+    }
 }

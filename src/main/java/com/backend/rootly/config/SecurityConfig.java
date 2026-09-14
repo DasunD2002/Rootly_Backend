@@ -55,7 +55,13 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
                                 "/api/auth/login",
-                                "/api/auth/register"
+                                "/api/auth/register",
+                                "/api/v1/media/files/**",
+                                "/api/media/files/**",
+                                "/api/v1/explore/**",
+                                "/api/explore/**",
+                                "/api/v1/capsules/join/**",
+                                "/api/capsules/join/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

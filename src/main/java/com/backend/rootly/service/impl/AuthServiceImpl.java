@@ -59,6 +59,7 @@ public class AuthServiceImpl implements AuthService {
         user.setIsOtpVerified(false);
         user.setProfileVisibility("PUBLIC");
         user.setShowActivity(true);
+        user.setSubscriptionMonthsLeft(12);
 
         UserReg savedUser = userRepository.save(user);
 

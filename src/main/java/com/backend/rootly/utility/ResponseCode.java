@@ -23,6 +23,19 @@ public class ResponseCode {
     public static final String CAPSULE_INVITE_SUCCESS = "rootly-202";
     public static final String CAPSULE_NOT_FOUND = "rootly-203";
     public static final String CAPSULE_GET_SUCCESS = "rootly-204";
+    public static final String CAPSULE_UPDATE_SUCCESS = "rootly-205";
+    public static final String CAPSULE_DELETE_SUCCESS = "rootly-206";
+
+    // Memory & Media Response Codes
+    public static final String MEMORY_CREATE_SUCCESS = "rootly-207";
+    public static final String MEMORY_GET_SUCCESS = "rootly-208";
+    public static final String MEDIA_UPLOAD_SUCCESS = "rootly-209";
+    public static final String MEMORY_REACT_SUCCESS = "rootly-212";
+    public static final String MEMORY_NOT_FOUND = "rootly-213";
+
+    // Notification Response Codes
+    public static final String NOTIFICATION_GET_SUCCESS = "rootly-210";
+    public static final String NOTIFICATION_UPDATE_SUCCESS = "rootly-211";
 
     // Explore Response Codes
     public static final String EXPLORE_PLACES_SUCCESS = "rootly-301";
