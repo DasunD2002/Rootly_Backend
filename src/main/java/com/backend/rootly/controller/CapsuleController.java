@@ -88,6 +88,7 @@ public class CapsuleController {
         }
         return capsuleService.updateCapsule(capsuleId, requesterId, requestDTO, locale);
     }
+    //delete
 
     @DeleteMapping(value = {
             EndPoint.CAPSULE_DETAIL,
