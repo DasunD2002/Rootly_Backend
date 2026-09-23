@@ -1,0 +1,218 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "name": {
+          "value": "Uva Province"
+        },
+        "description": {
+          "value": "province of Sri Lanka"
+        },
+        "capitalLabel": {
+          "value": "Badulla"
+        },
+        "districtLabel": {
+          "value": "Monaragala District"
+        },
+        "image": {
+          "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Test%20Province.jpg"
+        },
+        "article": {
+          "value": "https://en.wikipedia.org/wiki/Uva_Province"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q200"
+        },
+        "name": {
+          "value": "Badulla District"
+        },
+        "typeLabel": {
+          "value": "district of Sri Lanka"
+        },
+        "area": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q100"
+        },
+        "name": {
+          "value": "Test Temple"
+        },
+        "coordinate": {
+          "value": "Point(81.06 6.98)"
+        },
+        "locatedInProvince": {
+          "value": "true"
+        },
+        "typeLabel": {
+          "value": "Buddhist temple"
+        },
+        "areaLabel": {
+          "value": "Badulla District"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q100"
+        },
+        "name": {
+          "value": "Test Temple"
+        },
+        "coordinate": {
+          "value": "Point(81.06 6.98)"
+        },
+        "locatedInProvince": {
+          "value": "true"
+        },
+        "typeLabel": {
+          "value": "historic monument"
+        },
+        "image": {
+          "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Test%20Temple.jpg"
+        },
+        "description": {
+          "value": "Test fixture temple"
+        },
+        "article": {
+          "value": "https://en.wikipedia.org/wiki/Test_Temple"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q300"
+        },
+        "name": {
+          "value": "Alpha Museum"
+        },
+        "coordinate": {
+          "value": "Point(81.1 6.9)"
+        },
+        "locatedInProvince": {
+          "value": "true"
+        },
+        "typeLabel": {
+          "value": "archaeological museum"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q400"
+        },
+        "name": {
+          "value": "Regional Festival"
+        },
+        "typeLabel": {
+          "value": "cultural festival"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q400"
+        },
+        "name": {
+          "value": "Regional Festival"
+        },
+        "typeLabel": {
+          "value": "festival"
+        },
+        "description": {
+          "value": "Test fixture festival"
+        },
+        "image": {
+          "value": "https://commons.wikimedia.org/wiki/Special:FilePath/Test%20Festival.jpg"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q500"
+        },
+        "name": {
+          "value": "Temple Museum School"
+        },
+        "coordinate": {
+          "value": "Point(81.06 6.98)"
+        },
+        "locatedInProvince": {
+          "value": "true"
+        },
+        "typeLabel": {
+          "value": "school"
+        },
+        "description": {
+          "value": "A school near a fort"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q600"
+        },
+        "name": {
+          "value": "Origin link only"
+        },
+        "coordinate": {
+          "value": "Point(81.06 6.98)"
+        },
+        "locatedInProvince": {
+          "value": "false"
+        },
+        "typeLabel": {
+          "value": "Buddhist temple"
+        }
+      },
+      {
+        "province": {
+          "value": "http://www.wikidata.org/entity/Q876293"
+        },
+        "place": {
+          "value": "http://www.wikidata.org/entity/Q700"
+        },
+        "name": {
+          "value": "Comfort Station"
+        },
+        "coordinate": {
+          "value": "Point(81.06 6.98)"
+        },
+        "locatedInProvince": {
+          "value": "true"
+        },
+        "typeLabel": {
+          "value": "comfort station"
+        }
+      }
+    ]
+  }
+}

@@ -100,6 +100,22 @@ class ExplorePlacesControllerTests {
     }
 
     @Test
+    void publicDetailReturnsTheSelectedPlace() throws Exception {
+        ExplorePlaceDTO place = new ExplorePlaceDTO("Q100", "Test Temple", "Sri Lanka",
+                "Sacred Sites", "sacred-sites", new ExploreLocationDTO(7.9668, 81.0041),
+                "Full historical narrative", "https://upload.wikimedia.org/photo.jpg",
+                "https://en.wikipedia.org/wiki/File:photo.jpg",
+                "https://www.wikidata.org/wiki/Q100", "https://en.wikipedia.org/wiki/Test_Temple");
+        when(service.getPlace("Q100")).thenReturn(ResponseEntity.ok(place));
+        mvc.perform(get("/api/v1/explore/places/Q100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description").value("Full historical narrative"))
+                .andExpect(jsonPath("$.imageUrl").value("https://upload.wikimedia.org/photo.jpg"));
+        when(service.getPlace("bad")).thenThrow(new IllegalArgumentException("Invalid place"));
+        mvc.perform(get("/api/v1/explore/places/bad")).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void reportsBadParametersAndUpstreamFailureAsProblemResponses() throws Exception {
         when(service.search(new ExplorePlacesRequest("", "bad", 0, 20))).thenThrow(new IllegalArgumentException("Invalid category"));
         mvc.perform(places("{\"category\":\"bad\"}"))

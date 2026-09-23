@@ -2,8 +2,8 @@
 
 Spring Boot 4 / Java 17 API for fetching real Sri Lankan heritage places for
 Explore Places. The current endpoint reads Wikidata, not demo records or a
-database. It does not require a paid API key. Flutter integration is a separate
-step; the existing Flutter screens are not modified by this backend change.
+database. It does not require a paid API key. The Flutter province detail page also uses this service for province-specific
+heritage sites, traditions and source-linked photos.
 
 ## Project structure and conventions
 
@@ -65,7 +65,7 @@ From `Rootly_Backend`, with JDK 17 or newer installed:
 
 On Linux/macOS use `./mvnw spring-boot:run`. The server listens on port 8080.
 The first places request loads the public catalog and can take several seconds.
-The categories endpoint does not contact the provider.
+The categories endpoint does not contact the provider. Opening a place detail fetches its English Wikipedia introduction and lead photo when that place has a linked article, then caches the result for 15 minutes. If Wikipedia has no matching article or is unavailable, the detail endpoint returns the existing Wikidata description and image.
 
 ## Endpoints
 
@@ -76,7 +76,27 @@ Content-Type: application/json
 {"q":"temple","category":"sacred-sites","page":0,"size":10}
 
 GET /api/v1/explore/categories
+
+GET /api/v1/explore/places/{placeId}
+
+POST /api/v1/explore/province
+Content-Type: application/json
+
+{"provinceId":"uva","q":"temple","page":0,"size":10}
 ```
+
+The province endpoint accepts one of Sri Lanka's nine province IDs (`northern`,
+`north-central`, `north-western`, `central`, `eastern`, `western`, `southern`,
+`sabaragamuwa`, `uva`). It returns a sourced `province` profile, a paged
+`places` object with the same pagination/provenance fields as Explore Places,
+and a `traditions` array. Optional `q` searches that province's place names, locations,
+categories and descriptions (up to 120 characters, case/accent-insensitive).
+The filter runs before pagination; `total` and `hasNext` describe matching places.
+Traditions are unaffected. Image URLs point to Wikimedia Commons; corresponding
+`imageSourceUrl` values open the source file pages. Missing source photos or
+traditions remain empty, and cached data is marked `stale` when the provider
+cannot be refreshed. Photos are fetched by the Flutter app as 900px Commons
+thumbnails for faster loading.
 
 The places endpoint requires a JSON body. Send an empty object to use all
 defaults. The previous GET places route has been replaced by POST.
@@ -113,6 +133,7 @@ with no usable cached catalog returns HTTP 503 and `Retry-After`.
 | --- | --- |
 | `PORT` | `8080` |
 | `WIKIDATA_URL` | `https://query.wikidata.org/sparql` |
+| `WIKIPEDIA_API_URL` | `https://en.wikipedia.org/w/api.php` |
 | `WIKIDATA_USER_AGENT` | `RootlyBackend/0.1 (Sri Lanka heritage explorer)` |
 | `EXPLORE_CONNECT_TIMEOUT` | `5s` |
 | `EXPLORE_REQUEST_TIMEOUT` | `25s` |
@@ -134,7 +155,7 @@ INFO, WARN and ERROR files under `ROOTLY_LOG_PATH`; files rotate daily or at 10 
 
 Set a descriptive User-Agent with a real project URL or maintainer contact before
 deployment. For Flutter web, set `ROOTLY_ALLOWED_ORIGINS` to your site's origin;
-comma-separated origins are supported. Only POST places and GET categories are public;
+comma-separated origins are supported. POST places, GET place detail, GET categories, and POST province are public;
 other application paths remain denied by Spring Security. CORS permits GET and POST
 from configured origins. The public, read-only places POST is exempt from CSRF
 checks; other paths retain CSRF protection.
@@ -179,7 +200,7 @@ links to the file description containing the author and license. It is not a
 blanket license to redistribute the image. Display the applicable author/license
 credits when integrating photos; see
 [Commons reuse guidance](https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia).
-The API returns optional Wikipedia article links, not copied article text.
+Place detail may return plain-text article introductions from Wikipedia, with the article link in `wikipediaUrl`; Wikipedia text is available under CC BY-SA and requires attribution. The image source link points to the file page for author and licence details. If an article has no introduction or photo, those fields may remain short or empty rather than being invented.
 
 ## Verify
 

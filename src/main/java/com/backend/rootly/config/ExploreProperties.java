@@ -13,6 +13,7 @@ import java.util.List;
 public class ExploreProperties {
 
     private URI wikidataUrl = URI.create("https://query.wikidata.org/sparql");
+    private URI wikipediaUrl = URI.create("https://en.wikipedia.org/w/api.php");
     private String userAgent = "RootlyBackend/0.1 (Sri Lanka heritage explorer)";
     private Duration connectTimeout = Duration.ofSeconds(5);
     private Duration requestTimeout = Duration.ofSeconds(25);
