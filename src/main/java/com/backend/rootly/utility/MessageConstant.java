@@ -46,4 +46,11 @@ public class MessageConstant {
     /*--------------- Translation Messages ---------------*/
     public static final String TRANSLATION_LOOKUP_SUCCESS = "val.translation.lookup.success";
     public static final String TRANSLATION_GLOSSARY_SUCCESS = "val.translation.glossary.success";
+
+    /*--------------- Post Messages ---------------*/
+    public static final String POST_CREATE_SUCCESS = "val.post.create.success";
+    public static final String POST_UPDATE_SUCCESS = "val.post.update.success";
+    public static final String POST_DELETE_SUCCESS = "val.post.delete.success";
+    public static final String POST_NOT_FOUND = "val.post.not.found";
+    public static final String POST_FORBIDDEN = "val.post.forbidden";
 }
