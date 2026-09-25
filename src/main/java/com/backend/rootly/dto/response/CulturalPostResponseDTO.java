@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
+@SuppressWarnings("PMD.TooManyFields")
 public class CulturalPostResponseDTO {
     private String id;
     private String userId;

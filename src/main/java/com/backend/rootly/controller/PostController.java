@@ -27,6 +27,7 @@ import java.util.Locale;
 @CrossOrigin
 @RequiredArgsConstructor
 @Log4j2
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class PostController {
 
     private final CulturalPostService culturalPostService;

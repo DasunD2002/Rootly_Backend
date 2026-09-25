@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @Document(collection = "posts")
+@SuppressWarnings("PMD.TooManyFields")
 public class CulturalPost {
 
     @Id

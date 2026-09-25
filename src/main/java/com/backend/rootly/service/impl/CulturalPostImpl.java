@@ -27,6 +27,7 @@ import java.util.Optional;
 @Service
 @Log4j2
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CognitiveComplexity", "PMD.SimplifiedTernary", "PMD.UseLocaleWithCaseConversions"})
 public class CulturalPostImpl implements CulturalPostService {
 
     private final PostRepository postRepository;
