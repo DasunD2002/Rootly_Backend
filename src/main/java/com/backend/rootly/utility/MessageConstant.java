@@ -33,4 +33,17 @@ public class MessageConstant {
     public static final String PLACES_UNAVAILABLE = "val.places.unavailable";
     public static final String EXPLORE_PLACES_SUCCESS = "val.explore.places.success";
     public static final String EXPLORE_CATEGORIES_SUCCESS = "val.explore.categories.success";
+
+    /*--------------- Question Forum Messages ---------------*/
+    public static final String QUESTION_LIST_SUCCESS = "val.question.list.success";
+    public static final String QUESTION_DETAIL_SUCCESS = "val.question.detail.success";
+    public static final String QUESTION_CREATE_SUCCESS = "val.question.create.success";
+    public static final String QUESTION_COMMENT_CREATE_SUCCESS = "val.question.comment.create.success";
+    public static final String QUESTION_VOTE_SUCCESS = "val.question.vote.success";
+    public static final String QUESTION_BOOKMARK_SUCCESS = "val.question.bookmark.success";
+    public static final String QUESTION_BOOKMARK_REMOVE_SUCCESS = "val.question.bookmark.remove.success";
+
+    /*--------------- Translation Messages ---------------*/
+    public static final String TRANSLATION_LOOKUP_SUCCESS = "val.translation.lookup.success";
+    public static final String TRANSLATION_GLOSSARY_SUCCESS = "val.translation.glossary.success";
 }

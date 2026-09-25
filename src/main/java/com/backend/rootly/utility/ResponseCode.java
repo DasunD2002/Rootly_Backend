@@ -29,6 +29,18 @@ public class ResponseCode {
     public static final String EXPLORE_CATEGORIES_SUCCESS = "rootly-302";
     public static final String PLACES_UNAVAILABLE = "rootly-303";
 
+    // Question Forum Response Codes
+    public static final String QUESTION_LIST_SUCCESS = "rootly-501";
+    public static final String QUESTION_DETAIL_SUCCESS = "rootly-502";
+    public static final String QUESTION_CREATE_SUCCESS = "rootly-503";
+    public static final String QUESTION_COMMENT_CREATE_SUCCESS = "rootly-504";
+    public static final String QUESTION_VOTE_SUCCESS = "rootly-505";
+    public static final String QUESTION_BOOKMARK_SUCCESS = "rootly-506";
+
+    // Translation Response Codes
+    public static final String TRANSLATION_LOOKUP_SUCCESS = "rootly-601";
+    public static final String TRANSLATION_GLOSSARY_SUCCESS = "rootly-602";
+
     // Common & Validation Codes
     public static final String REQUIRED_DATA_ELEMENT_MISSING = "rootly-400";
     public static final String BAD_REQUEST = "rootly-400";
