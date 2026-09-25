@@ -1,6 +1,7 @@
 package com.backend.rootly.advisor;
 
 import com.backend.rootly.controller.ExplorePlacesController;
+import com.backend.rootly.controller.ProvinceExploreController;
 import com.backend.rootly.exception.PlacesUnavailableException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice(assignableTypes = ExplorePlacesController.class)
+@RestControllerAdvice(assignableTypes = {ExplorePlacesController.class, ProvinceExploreController.class})
 public class ExploreApiExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)

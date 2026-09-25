@@ -10,5 +10,7 @@ public interface ExplorePlacesService {
 
     ResponseEntity<Object> search(ExplorePlacesRequest request);
 
+    ResponseEntity<Object> getPlace(String placeId);
+
     List<ExploreCategoryResponseDTO> getCategories();
 }
