@@ -33,4 +33,11 @@ public class MessageConstant {
     public static final String PLACES_UNAVAILABLE = "val.places.unavailable";
     public static final String EXPLORE_PLACES_SUCCESS = "val.explore.places.success";
     public static final String EXPLORE_CATEGORIES_SUCCESS = "val.explore.categories.success";
+
+    /*--------------- Post Messages ---------------*/
+    public static final String POST_CREATE_SUCCESS = "val.post.create.success";
+    public static final String POST_UPDATE_SUCCESS = "val.post.update.success";
+    public static final String POST_DELETE_SUCCESS = "val.post.delete.success";
+    public static final String POST_NOT_FOUND = "val.post.not.found";
+    public static final String POST_FORBIDDEN = "val.post.forbidden";
 }

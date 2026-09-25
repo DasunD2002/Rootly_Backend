@@ -31,7 +31,6 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final ResponseGenerator responseGenerator;
-    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
