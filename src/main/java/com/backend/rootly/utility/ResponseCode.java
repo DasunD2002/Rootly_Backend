@@ -29,6 +29,14 @@ public class ResponseCode {
     public static final String EXPLORE_CATEGORIES_SUCCESS = "rootly-302";
     public static final String PLACES_UNAVAILABLE = "rootly-303";
 
+    // Post Response Codes
+    public static final String POST_CREATE_SUCCESS = "rootly-601";
+    public static final String POST_UPDATE_SUCCESS = "rootly-602";
+    public static final String POST_DELETE_SUCCESS = "rootly-603";
+    public static final String POST_NOT_FOUND = "rootly-604";
+    public static final String POST_FORBIDDEN = "rootly-605";
+    public static final String POST_GET_SUCCESS = "rootly-606";
+
     // Common & Validation Codes
     public static final String REQUIRED_DATA_ELEMENT_MISSING = "rootly-400";
     public static final String BAD_REQUEST = "rootly-400";
