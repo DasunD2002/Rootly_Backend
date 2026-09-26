@@ -82,6 +82,9 @@ public class UserReg {
     @Field("created_at")
     private Instant createdAt;
 
+    @Field("saved_posts")
+    private List<String> savedPosts = new java.util.ArrayList<>();
+
     @LastModifiedDate
     @Field("updated_at")
     private Instant updatedAt;
