@@ -45,7 +45,7 @@ class AuthServiceImplTests {
         ModelMapper modelMapper = new ModelMapper();
         ResponseGenerator responseGenerator = new ResponseGenerator(modelMapper, messageSource);
 
-        authService = new AuthServiceImpl(userRepository, passwordEncoder, jwtService, responseGenerator, modelMapper);
+        authService = new AuthServiceImpl(userRepository, passwordEncoder, jwtService, responseGenerator);
     }
 
     @Test

@@ -33,4 +33,28 @@ public class MessageConstant {
     public static final String PLACES_UNAVAILABLE = "val.places.unavailable";
     public static final String EXPLORE_PLACES_SUCCESS = "val.explore.places.success";
     public static final String EXPLORE_CATEGORIES_SUCCESS = "val.explore.categories.success";
+
+    /*--------------- Question Forum Messages ---------------*/
+    public static final String QUESTION_LIST_SUCCESS = "val.question.list.success";
+    public static final String QUESTION_DETAIL_SUCCESS = "val.question.detail.success";
+    public static final String QUESTION_CREATE_SUCCESS = "val.question.create.success";
+    public static final String QUESTION_COMMENT_CREATE_SUCCESS = "val.question.comment.create.success";
+    public static final String QUESTION_VOTE_SUCCESS = "val.question.vote.success";
+    public static final String QUESTION_BOOKMARK_SUCCESS = "val.question.bookmark.success";
+    public static final String QUESTION_BOOKMARK_REMOVE_SUCCESS = "val.question.bookmark.remove.success";
+    public static final String QUESTION_UPDATE_SUCCESS = "val.question.update.success";
+    public static final String QUESTION_DELETE_SUCCESS = "val.question.delete.success";
+    public static final String QUESTION_COMMENT_UPDATE_SUCCESS = "val.question.comment.update.success";
+    public static final String QUESTION_COMMENT_DELETE_SUCCESS = "val.question.comment.delete.success";
+
+    /*--------------- Translation Messages ---------------*/
+    public static final String TRANSLATION_LOOKUP_SUCCESS = "val.translation.lookup.success";
+    public static final String TRANSLATION_GLOSSARY_SUCCESS = "val.translation.glossary.success";
+
+    /*--------------- Post Messages ---------------*/
+    public static final String POST_CREATE_SUCCESS = "val.post.create.success";
+    public static final String POST_UPDATE_SUCCESS = "val.post.update.success";
+    public static final String POST_DELETE_SUCCESS = "val.post.delete.success";
+    public static final String POST_NOT_FOUND = "val.post.not.found";
+    public static final String POST_FORBIDDEN = "val.post.forbidden";
 }

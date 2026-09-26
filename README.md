@@ -2,8 +2,8 @@
 
 Spring Boot 4 / Java 17 API for fetching real Sri Lankan heritage places for
 Explore Places. The current endpoint reads Wikidata, not demo records or a
-database. It does not require a paid API key. Flutter integration is a separate
-step; the existing Flutter screens are not modified by this backend change.
+database. It does not require a paid API key. The Flutter province detail page also uses this service for province-specific
+heritage sites, traditions and source-linked photos.
 
 ## Project structure and conventions
 
@@ -65,7 +65,7 @@ From `Rootly_Backend`, with JDK 17 or newer installed:
 
 On Linux/macOS use `./mvnw spring-boot:run`. The server listens on port 8080.
 The first places request loads the public catalog and can take several seconds.
-The categories endpoint does not contact the provider.
+The categories endpoint does not contact the provider. Opening a place detail fetches its English Wikipedia introduction and lead photo when that place has a linked article, then caches the result for 15 minutes. If Wikipedia has no matching article or is unavailable, the detail endpoint returns the existing Wikidata description and image.
 
 ## Endpoints
 
@@ -76,7 +76,27 @@ Content-Type: application/json
 {"q":"temple","category":"sacred-sites","page":0,"size":10}
 
 GET /api/v1/explore/categories
+
+GET /api/v1/explore/places/{placeId}
+
+POST /api/v1/explore/province
+Content-Type: application/json
+
+{"provinceId":"uva","q":"temple","page":0,"size":10}
 ```
+
+The province endpoint accepts one of Sri Lanka's nine province IDs (`northern`,
+`north-central`, `north-western`, `central`, `eastern`, `western`, `southern`,
+`sabaragamuwa`, `uva`). It returns a sourced `province` profile, a paged
+`places` object with the same pagination/provenance fields as Explore Places,
+and a `traditions` array. Optional `q` searches that province's place names, locations,
+categories and descriptions (up to 120 characters, case/accent-insensitive).
+The filter runs before pagination; `total` and `hasNext` describe matching places.
+Traditions are unaffected. Image URLs point to Wikimedia Commons; corresponding
+`imageSourceUrl` values open the source file pages. Missing source photos or
+traditions remain empty, and cached data is marked `stale` when the provider
+cannot be refreshed. Photos are fetched by the Flutter app as 900px Commons
+thumbnails for faster loading.
 
 The places endpoint requires a JSON body. Send an empty object to use all
 defaults. The previous GET places route has been replaced by POST.
@@ -113,6 +133,7 @@ with no usable cached catalog returns HTTP 503 and `Retry-After`.
 | --- | --- |
 | `PORT` | `8080` |
 | `WIKIDATA_URL` | `https://query.wikidata.org/sparql` |
+| `WIKIPEDIA_API_URL` | `https://en.wikipedia.org/w/api.php` |
 | `WIKIDATA_USER_AGENT` | `RootlyBackend/0.1 (Sri Lanka heritage explorer)` |
 | `EXPLORE_CONNECT_TIMEOUT` | `5s` |
 | `EXPLORE_REQUEST_TIMEOUT` | `25s` |
@@ -134,7 +155,7 @@ INFO, WARN and ERROR files under `ROOTLY_LOG_PATH`; files rotate daily or at 10 
 
 Set a descriptive User-Agent with a real project URL or maintainer contact before
 deployment. For Flutter web, set `ROOTLY_ALLOWED_ORIGINS` to your site's origin;
-comma-separated origins are supported. Only POST places and GET categories are public;
+comma-separated origins are supported. POST places, GET place detail, GET categories, and POST province are public;
 other application paths remain denied by Spring Security. CORS permits GET and POST
 from configured origins. The public, read-only places POST is exempt from CSRF
 checks; other paths retain CSRF protection.
@@ -179,7 +200,99 @@ links to the file description containing the author and license. It is not a
 blanket license to redistribute the image. Display the applicable author/license
 credits when integrating photos; see
 [Commons reuse guidance](https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia).
-The API returns optional Wikipedia article links, not copied article text.
+Place detail may return plain-text article introductions from Wikipedia, with the article link in `wikipediaUrl`; Wikipedia text is available under CC BY-SA and requires attribution. The image source link points to the file page for author and licence details. If an article has no introduction or photo, those fields may remain short or empty rather than being invented.
+
+## Question forum API
+
+The authenticated question forum stores questions, Reddit-style nested comments,
+votes and bookmarks in MongoDB. Send the JWT returned by the login endpoint as
+`Authorization: Bearer <token>` on every request.
+
+```http
+GET /api/v1/questions?q=temple&category=rituals-etiquette&sort=top&page=0&size=20
+GET /api/v1/questions/{questionId}?commentSort=top
+
+POST /api/v1/questions
+Content-Type: application/json
+
+{
+  "title": "Why are lotus flowers offered at sacred places?",
+  "body": "I saw families carrying white lotus flowers and would like to understand the meaning.",
+  "location": "Anuradhapura",
+  "category": "rituals-etiquette"
+}
+
+PUT /api/v1/questions/{questionId}
+Content-Type: application/json
+
+{
+  "title": "Updated question title",
+  "body": "Updated question context with enough detail.",
+  "location": "Anuradhapura",
+  "category": "rituals-etiquette"
+}
+
+DELETE /api/v1/questions/{questionId}
+
+POST /api/v1/questions/{questionId}/comments
+Content-Type: application/json
+
+{"body":"A top-level answer","parentCommentId":null}
+
+POST /api/v1/questions/{questionId}/comments
+Content-Type: application/json
+
+{"body":"A nested reply","parentCommentId":"comment-id"}
+
+PUT /api/v1/comments/{commentId}
+Content-Type: application/json
+
+{"body":"Updated comment text"}
+
+DELETE /api/v1/comments/{commentId}
+
+PUT /api/v1/questions/{questionId}/vote
+PUT /api/v1/comments/{commentId}/vote
+Content-Type: application/json
+
+{"value":1}
+
+PUT /api/v1/questions/{questionId}/bookmark
+DELETE /api/v1/questions/{questionId}/bookmark
+```
+
+Vote values are `1` for upvote, `-1` for downvote, and `0` to remove the
+current user's vote. Question authors, comment authors, viewer votes, bookmarks
+and ownership flags are derived from the authenticated user rather than accepted
+from the request body. Only an item's owner may edit or delete it. Question
+deletion is soft deletion. A deleted comment with active replies remains as a
+content-free tombstone so the nested conversation is preserved; a deleted leaf
+comment is omitted from the response.
+
+## Offline translation API
+
+The authenticated translation API uses a curated MongoDB word bank and does not
+call Google, Azure, or another translation provider. On startup it inserts any
+missing entries from `src/main/resources/data/translations.json`; existing entries
+are left unchanged. The initial catalogue has 60 English-Sinhala entries across
+Temple, Greetings, Food, and Directions.
+
+```http
+POST /api/v1/translations/lookup
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{"text":"stupa","sourceLanguage":"en","targetLanguage":"si"}
+
+GET /api/v1/translations/glossary?category=Temple&page=0&size=10
+Authorization: Bearer <token>
+```
+
+Lookup supports `en` and `si` in either direction. English matching is
+case-insensitive and accent-insensitive, and also checks curated aliases. Sinhala
+matching checks the Sinhala word, transliteration, and pronunciation guide. An
+unknown word returns HTTP 404 rather than an invented translation. Set
+`TRANSLATION_SEED_ENABLED=false` to disable startup seeding.
 
 ## Verify
 

@@ -1,6 +1,7 @@
 package com.backend.rootly.service.impl;
 
 import com.backend.rootly.client.WikidataPlacesClient;
+import com.backend.rootly.client.WikipediaPlaceDetailClient;
 import com.backend.rootly.config.ExploreProperties;
 import com.backend.rootly.domain.ExploreCatalog;
 import com.backend.rootly.domain.ExplorePlacesRequest;
@@ -13,6 +14,8 @@ import com.backend.rootly.service.ExplorePlacesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -32,6 +35,7 @@ public class ExplorePlacesServiceImpl implements ExplorePlacesService {
     private static final int MAX_PAGE = 1_000_000;
     private static final int MAX_PAGE_SIZE = 50;
     private final WikidataPlacesClient client;
+    private final WikipediaPlaceDetailClient detailClient;
     private final Clock clock;
     private final ExploreProperties properties;
     private ExploreCatalog cached;
@@ -63,6 +67,18 @@ public class ExplorePlacesServiceImpl implements ExplorePlacesService {
 
         return ResponseEntity.ok(new ExplorePlacesResponseDTO(items, page, size, matches.size(), start + items.size() < matches.size(),
                 "Wikidata", catalog.getFetchedAt(), !isFresh(catalog), catalog.isTruncated()));
+    }
+
+    @Override
+    public ResponseEntity<Object> getPlace(String placeId) {
+        if (placeId == null || !placeId.matches("Q[1-9][0-9]*")) {
+            throw new IllegalArgumentException("placeId must be a Wikidata Q identifier");
+        }
+        ExplorePlaceDTO place = catalog().getPlaces().stream()
+                .filter(item -> placeId.equals(item.getId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Place was not found"));
+        return ResponseEntity.ok(detailClient.enrich(place));
     }
 
     @Override

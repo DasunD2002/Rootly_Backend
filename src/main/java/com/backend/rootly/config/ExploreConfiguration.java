@@ -57,12 +57,15 @@ public class ExploreConfiguration {
         http.securityMatcher(EndPoint.API + EndPoint.EXPLORE_PATH_PATTERN)
                 .cors(Customizer.withDefaults())
                 // The public places POST performs a read-only search without session credentials.
-                .csrf(csrf -> csrf.ignoringRequestMatchers(EndPoint.API + EndPoint.EXPLORE_PLACES))
+                .csrf(csrf -> csrf.ignoringRequestMatchers(EndPoint.API + EndPoint.EXPLORE_PLACES,
+                        EndPoint.API + EndPoint.EXPLORE_PROVINCE))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers(HttpMethod.POST, EndPoint.API + EndPoint.EXPLORE_PLACES).permitAll()
-                        .requestMatchers(HttpMethod.GET, EndPoint.API + EndPoint.EXPLORE_CATEGORIES).permitAll()
+                        .requestMatchers(HttpMethod.POST, EndPoint.API + EndPoint.EXPLORE_PLACES,
+                                EndPoint.API + EndPoint.EXPLORE_PROVINCE).permitAll()
+                        .requestMatchers(HttpMethod.GET, EndPoint.API + EndPoint.EXPLORE_CATEGORIES,
+                                EndPoint.API + EndPoint.EXPLORE_PLACE_DETAIL).permitAll()
                         .anyRequest().denyAll());
         return http.build();
     }

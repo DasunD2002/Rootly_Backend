@@ -29,6 +29,30 @@ public class ResponseCode {
     public static final String EXPLORE_CATEGORIES_SUCCESS = "rootly-302";
     public static final String PLACES_UNAVAILABLE = "rootly-303";
 
+    // Question Forum Response Codes
+    public static final String QUESTION_LIST_SUCCESS = "rootly-501";
+    public static final String QUESTION_DETAIL_SUCCESS = "rootly-502";
+    public static final String QUESTION_CREATE_SUCCESS = "rootly-503";
+    public static final String QUESTION_COMMENT_CREATE_SUCCESS = "rootly-504";
+    public static final String QUESTION_VOTE_SUCCESS = "rootly-505";
+    public static final String QUESTION_BOOKMARK_SUCCESS = "rootly-506";
+    public static final String QUESTION_UPDATE_SUCCESS = "rootly-507";
+    public static final String QUESTION_DELETE_SUCCESS = "rootly-508";
+    public static final String QUESTION_COMMENT_UPDATE_SUCCESS = "rootly-509";
+    public static final String QUESTION_COMMENT_DELETE_SUCCESS = "rootly-510";
+
+    // Translation Response Codes
+    public static final String TRANSLATION_LOOKUP_SUCCESS = "rootly-601";
+    public static final String TRANSLATION_GLOSSARY_SUCCESS = "rootly-602";
+
+    // Post Response Codes
+    public static final String POST_CREATE_SUCCESS = "rootly-601";
+    public static final String POST_UPDATE_SUCCESS = "rootly-602";
+    public static final String POST_DELETE_SUCCESS = "rootly-603";
+    public static final String POST_NOT_FOUND = "rootly-604";
+    public static final String POST_FORBIDDEN = "rootly-605";
+    public static final String POST_GET_SUCCESS = "rootly-606";
+
     // Common & Validation Codes
     public static final String REQUIRED_DATA_ELEMENT_MISSING = "rootly-400";
     public static final String BAD_REQUEST = "rootly-400";

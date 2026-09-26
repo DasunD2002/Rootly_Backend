@@ -1,11 +1,13 @@
 package com.backend.rootly.service.impl;
 
 import com.backend.rootly.client.WikidataPlacesClient;
+import com.backend.rootly.client.WikipediaPlaceDetailClient;
 import com.backend.rootly.config.ExploreProperties;
 import com.backend.rootly.domain.ExploreCatalog;
 import com.backend.rootly.domain.ExplorePlacesRequest;
 import com.backend.rootly.dto.response.ExploreCategoryResponseDTO;
 import com.backend.rootly.dto.response.ExplorePlacesResponseDTO;
+import com.backend.rootly.dto.response.ExplorePlaceDTO;
 import com.backend.rootly.exception.PlacesUnavailableException;
 import com.backend.rootly.mapper.WikidataPlaceMapper;
 import com.backend.rootly.service.ExplorePlacesService;
@@ -31,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 class ExplorePlacesServiceImplTests {
     private final WikidataPlacesClient client = mock(WikidataPlacesClient.class);
+    private final WikipediaPlaceDetailClient detailClient = mock(WikipediaPlaceDetailClient.class);
     private final Clock clock = mock(Clock.class);
     private final Instant fetchedAt = Instant.parse("2026-01-01T00:00:00Z");
     private ExplorePlacesService service;
@@ -45,7 +48,7 @@ class ExplorePlacesServiceImplTests {
         ExploreProperties properties = new ExploreProperties();
         properties.setCacheTtl(Duration.ofMinutes(10));
         properties.setMaxStale(Duration.ofHours(1));
-        service = new ExplorePlacesServiceImpl(client, clock, properties);
+        service = new ExplorePlacesServiceImpl(client, detailClient, clock, properties);
     }
 
     private ExplorePlacesResponseDTO search(String query, String category, int page, int size) {
@@ -63,6 +66,16 @@ class ExplorePlacesServiceImplTests {
         assertThat(search("not-a-real-place", "all", 0, 20).getItems()).isEmpty();
         assertThat(search("", "museums", 0, 20).getItems()).isEmpty();
         assertThat(search("", "all", 1_000_000, 50).getItems()).isEmpty();
+        verify(client, times(1)).fetch();
+    }
+
+    @Test
+    void detailUsesCatalogIdentityAndEnrichesOnlyTheSelectedPlace() {
+        ExplorePlaceDTO selected = catalog.getPlaces().get(1);
+        when(detailClient.enrich(selected)).thenReturn(selected);
+        assertThat(service.getPlace(selected.getId()).getBody()).isEqualTo(selected);
+        verify(detailClient).enrich(selected);
+        assertThatThrownBy(() -> service.getPlace("bad")).isInstanceOf(IllegalArgumentException.class);
         verify(client, times(1)).fetch();
     }
 
