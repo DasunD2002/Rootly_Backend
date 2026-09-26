@@ -14,4 +14,6 @@ public interface QuestionCommentRepository extends MongoRepository<QuestionComme
     Optional<QuestionComment> findByIdAndStatus(String id, CommentStatus status);
 
     List<QuestionComment> findByQuestionIdAndStatusOrderByCreatedAtAsc(String questionId, CommentStatus status);
+
+    List<QuestionComment> findByQuestionIdOrderByCreatedAtAsc(String questionId);
 }

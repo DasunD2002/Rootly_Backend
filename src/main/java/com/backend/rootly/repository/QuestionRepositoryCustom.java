@@ -5,6 +5,7 @@ import com.backend.rootly.enums.QuestionCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+@FunctionalInterface
 public interface QuestionRepositoryCustom {
 
     Page<Question> search(String query, QuestionCategory category, boolean unanswered, Pageable pageable);

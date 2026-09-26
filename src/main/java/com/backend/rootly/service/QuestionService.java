@@ -17,8 +17,17 @@ public interface QuestionService {
 
     ResponseEntity<Object> createQuestion(CreateQuestionDomain request, UserReg author, Locale locale);
 
+    ResponseEntity<Object> updateQuestion(String questionId, CreateQuestionDomain request,
+                                          UserReg author, Locale locale);
+
+    ResponseEntity<Object> deleteQuestion(String questionId, UserReg author, Locale locale);
+
     ResponseEntity<Object> createComment(String questionId, CreateQuestionCommentDomain request,
                                          UserReg author, Locale locale);
+
+    ResponseEntity<Object> updateComment(String commentId, String body, UserReg author, Locale locale);
+
+    ResponseEntity<Object> deleteComment(String commentId, UserReg author, Locale locale);
 
     ResponseEntity<Object> voteQuestion(String questionId, ForumVoteDomain request,
                                         UserReg voter, Locale locale);

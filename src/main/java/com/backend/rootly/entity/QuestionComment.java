@@ -30,7 +30,6 @@ import java.time.Instant;
                 def = "{'questionId': 1, 'parentCommentId': 1, 'createdAt': 1}"),
         @CompoundIndex(name = "comment_question_root_idx", def = "{'questionId': 1, 'rootCommentId': 1}")
 })
-@SuppressWarnings("PMD.TooManyFields")
 public class QuestionComment {
 
     @Id

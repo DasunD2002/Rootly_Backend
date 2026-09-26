@@ -36,6 +36,10 @@ public class ResponseCode {
     public static final String QUESTION_COMMENT_CREATE_SUCCESS = "rootly-504";
     public static final String QUESTION_VOTE_SUCCESS = "rootly-505";
     public static final String QUESTION_BOOKMARK_SUCCESS = "rootly-506";
+    public static final String QUESTION_UPDATE_SUCCESS = "rootly-507";
+    public static final String QUESTION_DELETE_SUCCESS = "rootly-508";
+    public static final String QUESTION_COMMENT_UPDATE_SUCCESS = "rootly-509";
+    public static final String QUESTION_COMMENT_DELETE_SUCCESS = "rootly-510";
 
     // Translation Response Codes
     public static final String TRANSLATION_LOOKUP_SUCCESS = "rootly-601";

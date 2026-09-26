@@ -13,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@SuppressWarnings("PMD.TooManyFields")
 public class QuestionCommentResponseDTO {
 
     private String id;
@@ -25,6 +24,7 @@ public class QuestionCommentResponseDTO {
     private int viewerVote;
     private boolean verified;
     private boolean accepted;
+    private boolean deleted;
     private boolean ownedByViewer;
     private Instant createdAt;
     private Instant updatedAt;

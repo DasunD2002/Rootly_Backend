@@ -7,6 +7,7 @@ import com.backend.rootly.domain.QuestionSearchDomain;
 import com.backend.rootly.dto.request.CreateQuestionCommentRequestDTO;
 import com.backend.rootly.dto.request.CreateQuestionRequestDTO;
 import com.backend.rootly.dto.request.ForumVoteRequestDTO;
+import com.backend.rootly.dto.request.UpdateQuestionCommentRequestDTO;
 import com.backend.rootly.entity.UserReg;
 import com.backend.rootly.enums.QuestionCategory;
 import com.backend.rootly.service.QuestionService;
@@ -37,6 +38,7 @@ import java.util.Locale;
 @CrossOrigin
 @RequiredArgsConstructor
 @Log4j2
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals", "PMD.ExcessiveImports"})
 public class QuestionController {
 
     private final QuestionService questionService;
@@ -79,6 +81,24 @@ public class QuestionController {
         return questionService.createQuestion(request, author, locale);
     }
 
+    @PutMapping(value = EndPoint.QUESTION_DETAIL, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> updateQuestion(
+            @PathVariable String questionId,
+            @Validated @RequestBody CreateQuestionRequestDTO requestDTO,
+            @AuthenticationPrincipal UserReg author,
+            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+        CreateQuestionDomain request = modelMapper.map(requestDTO, CreateQuestionDomain.class);
+        return questionService.updateQuestion(questionId, request, author, locale);
+    }
+
+    @DeleteMapping(value = EndPoint.QUESTION_DETAIL, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> deleteQuestion(
+            @PathVariable String questionId,
+            @AuthenticationPrincipal UserReg author,
+            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+        return questionService.deleteQuestion(questionId, author, locale);
+    }
+
     @PostMapping(value = EndPoint.QUESTION_COMMENTS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> createComment(
             @PathVariable String questionId,
@@ -87,6 +107,23 @@ public class QuestionController {
             @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
         CreateQuestionCommentDomain request = modelMapper.map(requestDTO, CreateQuestionCommentDomain.class);
         return questionService.createComment(questionId, request, author, locale);
+    }
+
+    @PutMapping(value = EndPoint.QUESTION_COMMENT_DETAIL, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> updateComment(
+            @PathVariable String commentId,
+            @Validated @RequestBody UpdateQuestionCommentRequestDTO requestDTO,
+            @AuthenticationPrincipal UserReg author,
+            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+        return questionService.updateComment(commentId, requestDTO.getBody(), author, locale);
+    }
+
+    @DeleteMapping(value = EndPoint.QUESTION_COMMENT_DETAIL, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> deleteComment(
+            @PathVariable String commentId,
+            @AuthenticationPrincipal UserReg author,
+            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+        return questionService.deleteComment(commentId, author, locale);
     }
 
     @PutMapping(value = EndPoint.QUESTION_VOTE, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -5,6 +5,7 @@ import com.backend.rootly.domain.CreateQuestionDomain;
 import com.backend.rootly.domain.ForumVoteDomain;
 import com.backend.rootly.domain.QuestionSearchDomain;
 import com.backend.rootly.dto.response.ForumAuthorDTO;
+import com.backend.rootly.dto.response.ForumDeleteResponseDTO;
 import com.backend.rootly.dto.response.ForumVoteResponseDTO;
 import com.backend.rootly.dto.response.QuestionBookmarkResponseDTO;
 import com.backend.rootly.dto.response.QuestionCommentResponseDTO;
@@ -57,7 +58,16 @@ import java.util.function.IntConsumer;
 
 @Service
 @Log4j2
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveParameterList", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({
+        "PMD.TooManyMethods",
+        "PMD.CouplingBetweenObjects",
+        "PMD.GodClass",
+        "PMD.CyclomaticComplexity",
+        "PMD.AvoidDuplicateLiterals",
+        "PMD.GuardLogStatement",
+        "PMD.ExcessiveImports",
+        "PMD.LawOfDemeter"
+})
 public class QuestionServiceImpl implements QuestionService {
 
     private static final int MAX_PAGE_SIZE = 50;
@@ -134,14 +144,18 @@ public class QuestionServiceImpl implements QuestionService {
                                               UserReg viewer, Locale locale) {
         Question question = requireQuestion(questionId);
         String normalizedSort = normalizeSort(commentSort, false);
-        List<QuestionComment> comments = commentRepository
-                .findByQuestionIdAndStatusOrderByCreatedAtAsc(question.getId(), CommentStatus.ACTIVE);
+        List<QuestionComment> comments = commentRepository.findByQuestionIdOrderByCreatedAtAsc(question.getId());
 
         Set<String> authorIds = new HashSet<>();
         authorIds.add(question.getAuthorId());
-        comments.stream().map(QuestionComment::getAuthorId).forEach(authorIds::add);
+        comments.stream()
+                .filter(comment -> comment.getStatus() == CommentStatus.ACTIVE)
+                .map(QuestionComment::getAuthorId)
+                .forEach(authorIds::add);
         Map<String, UserReg> authors = loadAuthors(authorIds);
-        Set<String> commentIds = collectCommentIds(comments);
+        Set<String> commentIds = collectCommentIds(comments.stream()
+                .filter(comment -> comment.getStatus() == CommentStatus.ACTIVE)
+                .toList());
         Map<String, Integer> commentVotes = loadViewerVotes(viewer, ForumTargetType.COMMENT, commentIds);
         List<QuestionCommentResponseDTO> commentTree = buildCommentTree(
                 comments, authors, viewer, commentVotes, normalizedSort);
@@ -188,6 +202,62 @@ public class QuestionServiceImpl implements QuestionService {
         log.info("Question {} created by user {}", saved.getId(), authorId);
         return responseGenerator.generateSuccessResponse(request, HttpStatus.CREATED,
                 ResponseCode.QUESTION_CREATE_SUCCESS, MessageConstant.QUESTION_CREATE_SUCCESS, locale, response);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Object> updateQuestion(String questionId, CreateQuestionDomain request,
+                                                 UserReg author, Locale locale) {
+        String authorId = requireUserId(author);
+        Question question = requireQuestion(questionId);
+        if (!authorId.equals(question.getAuthorId())) {
+            return forbidden(request, "You can only edit your own question", locale);
+        }
+
+        String title = requireText(request == null ? null : request.getTitle(), 10, 200, "title");
+        String body = requireText(request.getBody(), 20, 5_000, "body");
+        String location = requireText(request.getLocation(), 1, 120, "location");
+        QuestionCategory category = request.getCategory();
+        if (category == null) {
+            throw new IllegalArgumentException("category is required");
+        }
+
+        question.setTitle(title);
+        question.setBody(body);
+        question.setLocation(location);
+        question.setPlaceId(trimToNull(request.getPlaceId()));
+        question.setCategory(category);
+        question.setUpdatedAt(Instant.now(clock));
+        Question saved = questionRepository.save(question);
+        int viewerVote = loadViewerVote(author, ForumTargetType.QUESTION, saved.getId());
+        boolean bookmarked = bookmarkRepository.findByUserIdAndQuestionId(authorId, saved.getId()).isPresent();
+        QuestionSummaryDTO response = toSummary(saved, author, author, viewerVote, bookmarked);
+
+        log.info("Question {} updated by user {}", saved.getId(), authorId);
+        return responseGenerator.generateSuccessResponse(request, HttpStatus.OK,
+                ResponseCode.QUESTION_UPDATE_SUCCESS, MessageConstant.QUESTION_UPDATE_SUCCESS, locale, response);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Object> deleteQuestion(String questionId, UserReg author, Locale locale) {
+        String authorId = requireUserId(author);
+        Question question = requireQuestion(questionId);
+        if (!authorId.equals(question.getAuthorId())) {
+            return forbidden(null, "You can only delete your own question", locale);
+        }
+
+        question.setStatus(QuestionStatus.DELETED);
+        question.setUpdatedAt(Instant.now(clock));
+        questionRepository.save(question);
+        ForumDeleteResponseDTO response = ForumDeleteResponseDTO.builder()
+                .targetId(question.getId())
+                .deleted(true)
+                .build();
+
+        log.info("Question {} deleted by user {}", question.getId(), authorId);
+        return responseGenerator.generateSuccessResponse(HttpStatus.OK,
+                ResponseCode.QUESTION_DELETE_SUCCESS, MessageConstant.QUESTION_DELETE_SUCCESS, response);
     }
 
     @Override
@@ -239,6 +309,69 @@ public class QuestionServiceImpl implements QuestionService {
         return responseGenerator.generateSuccessResponse(request, HttpStatus.CREATED,
                 ResponseCode.QUESTION_COMMENT_CREATE_SUCCESS,
                 MessageConstant.QUESTION_COMMENT_CREATE_SUCCESS, locale, response);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Object> updateComment(String commentId, String body,
+                                                UserReg author, Locale locale) {
+        String authorId = requireUserId(author);
+        QuestionComment comment = requireComment(commentId);
+        if (!authorId.equals(comment.getAuthorId())) {
+            return forbidden(null, "You can only edit your own comment", locale);
+        }
+
+        comment.setBody(requireText(body, 1, 5_000, "body"));
+        comment.setUpdatedAt(Instant.now(clock));
+        QuestionComment saved = commentRepository.save(comment);
+        int viewerVote = loadViewerVote(author, ForumTargetType.COMMENT, saved.getId());
+        QuestionCommentResponseDTO response = toCommentResponse(saved, author, author, viewerVote);
+
+        log.info("Comment {} updated by user {}", saved.getId(), authorId);
+        return responseGenerator.generateSuccessResponse(HttpStatus.OK,
+                ResponseCode.QUESTION_COMMENT_UPDATE_SUCCESS,
+                MessageConstant.QUESTION_COMMENT_UPDATE_SUCCESS, response);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Object> deleteComment(String commentId, UserReg author, Locale locale) {
+        String authorId = requireUserId(author);
+        QuestionComment comment = requireComment(commentId);
+        if (!authorId.equals(comment.getAuthorId())) {
+            return forbidden(null, "You can only delete your own comment", locale);
+        }
+
+        Instant now = Instant.now(clock);
+        comment.setBody("[deleted]");
+        comment.setAccepted(false);
+        comment.setStatus(CommentStatus.DELETED);
+        comment.setUpdatedAt(now);
+        commentRepository.save(comment);
+
+        Question question = requireQuestion(comment.getQuestionId());
+        boolean updateQuestion = false;
+        if (comment.getId().equals(question.getAcceptedCommentId())) {
+            question.setAcceptedCommentId(null);
+            updateQuestion = true;
+        }
+        if (comment.getParentCommentId() == null && !hasActiveDescendants(comment)) {
+            question.setCommentCount(Math.max(0, question.getCommentCount() - 1));
+            updateQuestion = true;
+        }
+        if (updateQuestion) {
+            question.setUpdatedAt(now);
+            questionRepository.save(question);
+        }
+
+        ForumDeleteResponseDTO response = ForumDeleteResponseDTO.builder()
+                .targetId(comment.getId())
+                .deleted(true)
+                .build();
+        log.info("Comment {} deleted by user {}", comment.getId(), authorId);
+        return responseGenerator.generateSuccessResponse(HttpStatus.OK,
+                ResponseCode.QUESTION_COMMENT_DELETE_SUCCESS,
+                MessageConstant.QUESTION_COMMENT_DELETE_SUCCESS, response);
     }
 
     @Override
@@ -348,14 +481,25 @@ public class QuestionServiceImpl implements QuestionService {
             UserReg viewer,
             Map<String, Integer> viewerVotes,
             String commentSort) {
+        Map<String, QuestionComment> commentsById = new HashMap<>();
+        comments.forEach(comment -> commentsById.put(comment.getId(), comment));
+        Set<String> visibleCommentIds = collectVisibleCommentIds(comments, commentsById);
         Map<String, QuestionCommentResponseDTO> responses = new LinkedHashMap<>();
         for (QuestionComment comment : comments) {
-            responses.put(comment.getId(), toCommentResponse(comment, authors.get(comment.getAuthorId()),
-                    viewer, viewerVotes.getOrDefault(comment.getId(), 0)));
+            if (visibleCommentIds.contains(comment.getId())) {
+                QuestionCommentResponseDTO response = comment.getStatus() == CommentStatus.DELETED
+                        ? toDeletedCommentResponse(comment)
+                        : toCommentResponse(comment, authors.get(comment.getAuthorId()),
+                                viewer, viewerVotes.getOrDefault(comment.getId(), 0));
+                responses.put(comment.getId(), response);
+            }
         }
 
         List<QuestionCommentResponseDTO> roots = new ArrayList<>();
         for (QuestionComment comment : comments) {
+            if (!visibleCommentIds.contains(comment.getId())) {
+                continue;
+            }
             QuestionCommentResponseDTO response = responses.get(comment.getId());
             QuestionCommentResponseDTO parent = responses.get(comment.getParentCommentId());
             if (comment.getParentCommentId() == null || parent == null) {
@@ -369,8 +513,29 @@ public class QuestionServiceImpl implements QuestionService {
                 ? Comparator.comparingInt(QuestionCommentResponseDTO::getVoteScore).reversed()
                         .thenComparing(QuestionCommentResponseDTO::getCreatedAt)
                 : Comparator.comparing(QuestionCommentResponseDTO::getCreatedAt).reversed();
-        roots.sort(comparator);
+        sortCommentTree(roots, comparator);
         return roots;
+    }
+
+    private static Set<String> collectVisibleCommentIds(
+            List<QuestionComment> comments, Map<String, QuestionComment> commentsById) {
+        Set<String> visibleIds = new HashSet<>();
+        for (QuestionComment comment : comments) {
+            if (comment.getStatus() != CommentStatus.ACTIVE) {
+                continue;
+            }
+            QuestionComment current = comment;
+            while (current != null && visibleIds.add(current.getId())) {
+                current = commentsById.get(current.getParentCommentId());
+            }
+        }
+        return visibleIds;
+    }
+
+    private static void sortCommentTree(List<QuestionCommentResponseDTO> comments,
+                                        Comparator<QuestionCommentResponseDTO> comparator) {
+        comments.sort(comparator);
+        comments.forEach(comment -> sortCommentTree(comment.getReplies(), comparator));
     }
 
     private QuestionSummaryDTO toSummary(Question question, UserReg author, UserReg viewer,
@@ -434,11 +599,49 @@ public class QuestionServiceImpl implements QuestionService {
                 .viewerVote(viewerVote)
                 .verified(comment.isVerified())
                 .accepted(comment.isAccepted())
+                .deleted(false)
                 .ownedByViewer(isOwner(viewer, comment.getAuthorId()))
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
                 .replies(new ArrayList<>())
                 .build();
+    }
+
+    private static QuestionCommentResponseDTO toDeletedCommentResponse(QuestionComment comment) {
+        ForumAuthorDTO deletedAuthor = ForumAuthorDTO.builder()
+                .name("Deleted user")
+                .initials("?")
+                .role("")
+                .verified(false)
+                .build();
+        return QuestionCommentResponseDTO.builder()
+                .id(comment.getId())
+                .questionId(comment.getQuestionId())
+                .parentCommentId(comment.getParentCommentId())
+                .author(deletedAuthor)
+                .body("This comment was deleted.")
+                .voteScore(0)
+                .viewerVote(0)
+                .verified(false)
+                .accepted(false)
+                .deleted(true)
+                .ownedByViewer(false)
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .replies(new ArrayList<>())
+                .build();
+    }
+
+    private boolean hasActiveDescendants(QuestionComment comment) {
+        return commentRepository.findByQuestionIdOrderByCreatedAtAsc(comment.getQuestionId()).stream()
+                .anyMatch(candidate -> candidate.getStatus() == CommentStatus.ACTIVE
+                        && !candidate.getId().equals(comment.getId())
+                        && comment.getRootCommentId().equals(candidate.getRootCommentId()));
+    }
+
+    private ResponseEntity<Object> forbidden(Object request, String message, Locale locale) {
+        return responseGenerator.generateErrorResponse(request, HttpStatus.FORBIDDEN,
+                ResponseCode.FORBIDDEN, message, locale, null);
     }
 
     private static ForumAuthorDTO toAuthor(UserReg user, String fallbackId) {

@@ -25,6 +25,7 @@ public final class EndPoint {
     public static final String QUESTIONS = "/v1/questions";
     public static final String QUESTION_DETAIL = "/v1/questions/{questionId}";
     public static final String QUESTION_COMMENTS = "/v1/questions/{questionId}/comments";
+    public static final String QUESTION_COMMENT_DETAIL = "/v1/comments/{commentId}";
     public static final String QUESTION_VOTE = "/v1/questions/{questionId}/vote";
     public static final String COMMENT_VOTE = "/v1/comments/{commentId}/vote";
     public static final String QUESTION_BOOKMARK = "/v1/questions/{questionId}/bookmark";

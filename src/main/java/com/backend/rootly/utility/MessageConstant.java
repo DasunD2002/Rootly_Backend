@@ -42,6 +42,10 @@ public class MessageConstant {
     public static final String QUESTION_VOTE_SUCCESS = "val.question.vote.success";
     public static final String QUESTION_BOOKMARK_SUCCESS = "val.question.bookmark.success";
     public static final String QUESTION_BOOKMARK_REMOVE_SUCCESS = "val.question.bookmark.remove.success";
+    public static final String QUESTION_UPDATE_SUCCESS = "val.question.update.success";
+    public static final String QUESTION_DELETE_SUCCESS = "val.question.delete.success";
+    public static final String QUESTION_COMMENT_UPDATE_SUCCESS = "val.question.comment.update.success";
+    public static final String QUESTION_COMMENT_DELETE_SUCCESS = "val.question.comment.delete.success";
 
     /*--------------- Translation Messages ---------------*/
     public static final String TRANSLATION_LOOKUP_SUCCESS = "val.translation.lookup.success";

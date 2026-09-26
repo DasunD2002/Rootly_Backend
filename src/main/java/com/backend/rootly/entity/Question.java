@@ -32,7 +32,6 @@ import java.time.Instant;
         @CompoundIndex(name = "question_top_idx", def = "{'voteScore': -1, 'createdAt': -1}"),
         @CompoundIndex(name = "question_unanswered_idx", def = "{'commentCount': 1, 'createdAt': -1}")
 })
-@SuppressWarnings("PMD.TooManyFields")
 public class Question {
 
     @Id

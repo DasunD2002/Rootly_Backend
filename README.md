@@ -222,6 +222,18 @@ Content-Type: application/json
   "category": "rituals-etiquette"
 }
 
+PUT /api/v1/questions/{questionId}
+Content-Type: application/json
+
+{
+  "title": "Updated question title",
+  "body": "Updated question context with enough detail.",
+  "location": "Anuradhapura",
+  "category": "rituals-etiquette"
+}
+
+DELETE /api/v1/questions/{questionId}
+
 POST /api/v1/questions/{questionId}/comments
 Content-Type: application/json
 
@@ -231,6 +243,13 @@ POST /api/v1/questions/{questionId}/comments
 Content-Type: application/json
 
 {"body":"A nested reply","parentCommentId":"comment-id"}
+
+PUT /api/v1/comments/{commentId}
+Content-Type: application/json
+
+{"body":"Updated comment text"}
+
+DELETE /api/v1/comments/{commentId}
 
 PUT /api/v1/questions/{questionId}/vote
 PUT /api/v1/comments/{commentId}/vote
@@ -245,7 +264,10 @@ DELETE /api/v1/questions/{questionId}/bookmark
 Vote values are `1` for upvote, `-1` for downvote, and `0` to remove the
 current user's vote. Question authors, comment authors, viewer votes, bookmarks
 and ownership flags are derived from the authenticated user rather than accepted
-from the request body.
+from the request body. Only an item's owner may edit or delete it. Question
+deletion is soft deletion. A deleted comment with active replies remains as a
+content-free tombstone so the nested conversation is preserved; a deleted leaf
+comment is omitted from the response.
 
 ## Offline translation API
 
