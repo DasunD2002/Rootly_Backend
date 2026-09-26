@@ -70,8 +70,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (log.isWarnEnabled()) {
                 log.warn("Invalid JWT token: {}", e.getMessage());
             }
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            // Clear context just in case
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
