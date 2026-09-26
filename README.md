@@ -202,6 +202,98 @@ credits when integrating photos; see
 [Commons reuse guidance](https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia).
 Place detail may return plain-text article introductions from Wikipedia, with the article link in `wikipediaUrl`; Wikipedia text is available under CC BY-SA and requires attribution. The image source link points to the file page for author and licence details. If an article has no introduction or photo, those fields may remain short or empty rather than being invented.
 
+## Question forum API
+
+The authenticated question forum stores questions, Reddit-style nested comments,
+votes and bookmarks in MongoDB. Send the JWT returned by the login endpoint as
+`Authorization: Bearer <token>` on every request.
+
+```http
+GET /api/v1/questions?q=temple&category=rituals-etiquette&sort=top&page=0&size=20
+GET /api/v1/questions/{questionId}?commentSort=top
+
+POST /api/v1/questions
+Content-Type: application/json
+
+{
+  "title": "Why are lotus flowers offered at sacred places?",
+  "body": "I saw families carrying white lotus flowers and would like to understand the meaning.",
+  "location": "Anuradhapura",
+  "category": "rituals-etiquette"
+}
+
+PUT /api/v1/questions/{questionId}
+Content-Type: application/json
+
+{
+  "title": "Updated question title",
+  "body": "Updated question context with enough detail.",
+  "location": "Anuradhapura",
+  "category": "rituals-etiquette"
+}
+
+DELETE /api/v1/questions/{questionId}
+
+POST /api/v1/questions/{questionId}/comments
+Content-Type: application/json
+
+{"body":"A top-level answer","parentCommentId":null}
+
+POST /api/v1/questions/{questionId}/comments
+Content-Type: application/json
+
+{"body":"A nested reply","parentCommentId":"comment-id"}
+
+PUT /api/v1/comments/{commentId}
+Content-Type: application/json
+
+{"body":"Updated comment text"}
+
+DELETE /api/v1/comments/{commentId}
+
+PUT /api/v1/questions/{questionId}/vote
+PUT /api/v1/comments/{commentId}/vote
+Content-Type: application/json
+
+{"value":1}
+
+PUT /api/v1/questions/{questionId}/bookmark
+DELETE /api/v1/questions/{questionId}/bookmark
+```
+
+Vote values are `1` for upvote, `-1` for downvote, and `0` to remove the
+current user's vote. Question authors, comment authors, viewer votes, bookmarks
+and ownership flags are derived from the authenticated user rather than accepted
+from the request body. Only an item's owner may edit or delete it. Question
+deletion is soft deletion. A deleted comment with active replies remains as a
+content-free tombstone so the nested conversation is preserved; a deleted leaf
+comment is omitted from the response.
+
+## Offline translation API
+
+The authenticated translation API uses a curated MongoDB word bank and does not
+call Google, Azure, or another translation provider. On startup it inserts any
+missing entries from `src/main/resources/data/translations.json`; existing entries
+are left unchanged. The initial catalogue has 60 English-Sinhala entries across
+Temple, Greetings, Food, and Directions.
+
+```http
+POST /api/v1/translations/lookup
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{"text":"stupa","sourceLanguage":"en","targetLanguage":"si"}
+
+GET /api/v1/translations/glossary?category=Temple&page=0&size=10
+Authorization: Bearer <token>
+```
+
+Lookup supports `en` and `si` in either direction. English matching is
+case-insensitive and accent-insensitive, and also checks curated aliases. Sinhala
+matching checks the Sinhala word, transliteration, and pronunciation guide. An
+unknown word returns HTTP 404 rather than an invented translation. Set
+`TRANSLATION_SEED_ENABLED=false` to disable startup seeding.
+
 ## Verify
 
 ```powershell
