@@ -2,6 +2,7 @@ package com.backend.rootly.service.impl;
 
 import com.backend.rootly.domain.CreateCapsuleDomain;
 import com.backend.rootly.domain.InviteContributorDomain;
+import com.backend.rootly.domain.UpdateCapsuleDomain;
 import com.backend.rootly.dto.response.CapsuleResponseDTO;
 import com.backend.rootly.entity.Capsule;
 import com.backend.rootly.enums.CapsulePrivacy;
@@ -115,6 +116,98 @@ public class CapsuleServiceImpl implements CapsuleService {
         CapsuleResponseDTO responseDTO = modelMapper.map(saved, CapsuleResponseDTO.class);
         return responseGenerator.generateSuccessResponse(request, HttpStatus.OK,
                 ResponseCode.CAPSULE_INVITE_SUCCESS, MessageConstant.CAPSULE_INVITE_SUCCESS, locale, responseDTO);
+    }
+
+    @Override
+    public ResponseEntity<Object> getCapsule(String capsuleId, Locale locale) {
+        String normalizedCapsuleId = requireId(capsuleId, "capsuleId is required");
+        Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
+        if (capsule == null) {
+            return responseGenerator.generateErrorResponse(null, HttpStatus.NOT_FOUND,
+                    ResponseCode.CAPSULE_NOT_FOUND, MessageConstant.CAPSULE_NOT_FOUND, locale);
+        }
+
+        CapsuleResponseDTO responseDTO = modelMapper.map(capsule, CapsuleResponseDTO.class);
+        return responseGenerator.generateSuccessResponse(HttpStatus.OK,
+                ResponseCode.CAPSULE_GET_SUCCESS, MessageConstant.SUCCESSFULLY_GET, responseDTO);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Object> updateCapsule(String capsuleId, UpdateCapsuleDomain request, Locale locale) {
+        String normalizedCapsuleId = requireId(capsuleId, "capsuleId is required");
+        Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
+        if (capsule == null) {
+            return responseGenerator.generateErrorResponse(request, HttpStatus.NOT_FOUND,
+                    ResponseCode.CAPSULE_NOT_FOUND, MessageConstant.CAPSULE_NOT_FOUND, locale);
+        }
+
+        if (request != null) {
+            request.validateUnlockCondition(clock);
+
+            if (request.getTitle() != null) {
+                capsule.setTitle(trimToNull(request.getTitle()));
+            }
+            if (request.getDescription() != null) {
+                capsule.setDescription(trimToNull(request.getDescription()));
+            }
+            if (request.getCoverPhotoUrl() != null) {
+                capsule.setCoverPhotoUrl(trimToNull(request.getCoverPhotoUrl()));
+            }
+            if (request.getType() != null) {
+                capsule.setType(request.getType());
+            }
+            if (request.getUnlockCondition() != null) {
+                capsule.setUnlockCondition(request.getUnlockCondition());
+            }
+            if (request.getSharedWithUserIds() != null) {
+                capsule.setSharedWithUserIds(cleanIds(request.getSharedWithUserIds()));
+            }
+            if (request.getPrivacy() != null) {
+                if (request.getPrivacy() == CapsulePrivacy.SHARED) {
+                    List<String> currentShared = capsule.getSharedWithUserIds();
+                    if (currentShared == null || currentShared.isEmpty()) {
+                        return responseGenerator.generateErrorResponse(request, HttpStatus.BAD_REQUEST,
+                                ResponseCode.BAD_REQUEST, "sharedWithUserIds is required when privacy is shared");
+                    }
+                }
+                capsule.setPrivacy(request.getPrivacy());
+            }
+            if (request.getStatus() != null) {
+                capsule.setStatus(request.getStatus());
+            }
+        }
+
+        capsule.setUpdatedAt(Instant.now(clock));
+        Capsule saved = capsuleRepository.save(capsule);
+
+        if (log.isInfoEnabled()) {
+            log.info("Capsule updated successfully with id: {}", saved.getId());
+        }
+
+        CapsuleResponseDTO responseDTO = modelMapper.map(saved, CapsuleResponseDTO.class);
+        return responseGenerator.generateSuccessResponse(request, HttpStatus.OK,
+                ResponseCode.CAPSULE_UPDATE_SUCCESS, MessageConstant.CAPSULE_UPDATE_SUCCESS, locale, responseDTO);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Object> deleteCapsule(String capsuleId, Locale locale) {
+        String normalizedCapsuleId = requireId(capsuleId, "capsuleId is required");
+        Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
+        if (capsule == null) {
+            return responseGenerator.generateErrorResponse(null, HttpStatus.NOT_FOUND,
+                    ResponseCode.CAPSULE_NOT_FOUND, MessageConstant.CAPSULE_NOT_FOUND, locale);
+        }
+
+        capsuleRepository.delete(capsule);
+
+        if (log.isInfoEnabled()) {
+            log.info("Capsule deleted successfully with id: {}", normalizedCapsuleId);
+        }
+
+        return responseGenerator.generateSuccessResponse(HttpStatus.OK,
+                ResponseCode.CAPSULE_DELETE_SUCCESS, MessageConstant.CAPSULE_DELETE_SUCCESS, null);
     }
 
     private static String requireContributorId(InviteContributorDomain request) {
