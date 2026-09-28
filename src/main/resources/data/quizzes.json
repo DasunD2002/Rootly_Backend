@@ -1,0 +1,22 @@
+[
+  {"code":"builder-stupa","type":"WORD_BUILDER","prompt":"Dome-shaped monument enshrining sacred relics","answer":"STUPA","maximumPoints":40,"active":true},
+  {"code":"builder-temple","type":"WORD_BUILDER","prompt":"A sacred building used for worship","answer":"TEMPLE","maximumPoints":40,"active":true},
+  {"code":"builder-lotus","type":"WORD_BUILDER","prompt":"A flower commonly offered at Buddhist shrines","answer":"LOTUS","maximumPoints":40,"active":true},
+  {"code":"builder-relic","type":"WORD_BUILDER","prompt":"A sacred object preserved from the past","answer":"RELIC","maximumPoints":40,"active":true},
+  {"code":"builder-vihara","type":"WORD_BUILDER","prompt":"A Buddhist monastery or temple residence","answer":"VIHARA","maximumPoints":40,"active":true},
+  {"code":"builder-dagaba","type":"WORD_BUILDER","prompt":"Sri Lankan name for a Buddhist stupa","answer":"DAGABA","maximumPoints":40,"active":true},
+
+  {"code":"meaning-dagaba","type":"MEANING_MATCH","prompt":"What does this heritage word mean?","displayWord":"dāgaba","answer":"A dome-shaped relic monument","options":["A dome-shaped relic monument","A monastery kitchen","A royal bathing pool","A carved gateway stone"],"maximumPoints":30,"active":true},
+  {"code":"meaning-vihara","type":"MEANING_MATCH","prompt":"What does this heritage word mean?","displayWord":"vihāra","answer":"A Buddhist monastery or temple","options":["A Buddhist monastery or temple","A stone irrigation channel","A ceremonial drum","A palace garden"],"maximumPoints":30,"active":true},
+  {"code":"meaning-bodhi","type":"MEANING_MATCH","prompt":"What does this heritage word refer to?","displayWord":"Bodhi","answer":"The sacred fig tree linked to enlightenment","options":["The sacred fig tree linked to enlightenment","A royal crown","A moonstone carving","A monastic dining hall"],"maximumPoints":30,"active":true},
+  {"code":"meaning-moonstone","type":"MEANING_MATCH","prompt":"What is a moonstone at a heritage site?","displayWord":"sandakaḍa pahaṇa","answer":"A carved semicircular entrance stone","options":["A carved semicircular entrance stone","A stone seat for a king","A circular temple roof","A water-storage pond"],"maximumPoints":30,"active":true},
+  {"code":"meaning-guardstone","type":"MEANING_MATCH","prompt":"What is the purpose of a guardstone?","displayWord":"muragala","answer":"A carved stone protecting a stairway entrance","options":["A carved stone protecting a stairway entrance","A marker for farmland","A seat used by monks","A tablet recording taxes"],"maximumPoints":30,"active":true},
+  {"code":"meaning-stupa","type":"MEANING_MATCH","prompt":"What is a stupa?","displayWord":"stūpa","answer":"A monument that enshrines sacred relics","options":["A monument that enshrines sacred relics","A hall for traditional dancing","A fortified city wall","A residence for a village chief"],"maximumPoints":30,"active":true},
+
+  {"code":"fill-sigiriya","type":"FILL_LETTERS","prompt":"The rock fortress with the lion’s paws","answer":"GRY","displayWord":"SI_I_I_A","letters":["G","R","Y","N","A","I","L"],"blankPositions":[2,4,6],"maximumPoints":30,"active":true},
+  {"code":"fill-dambulla","type":"FILL_LETTERS","prompt":"The cave temple famous for painted interiors","answer":"AUA","displayWord":"D_MB_LL_","letters":["A","U","A","E","I","O"],"blankPositions":[1,4,7],"maximumPoints":30,"active":true},
+  {"code":"fill-kandy","type":"FILL_LETTERS","prompt":"The hill capital that holds the Temple of the Tooth","answer":"AD","displayWord":"K_N_Y","letters":["A","D","U","I","N"],"blankPositions":[1,3],"maximumPoints":30,"active":true},
+  {"code":"fill-lotus","type":"FILL_LETTERS","prompt":"A sacred flower offered at shrines","answer":"OU","displayWord":"L_T_S","letters":["O","U","A","I","E"],"blankPositions":[1,3],"maximumPoints":30,"active":true},
+  {"code":"fill-relic","type":"FILL_LETTERS","prompt":"A sacred object preserved from history","answer":"EI","displayWord":"R_L_C","letters":["E","I","A","O","U"],"blankPositions":[1,3],"maximumPoints":30,"active":true},
+  {"code":"fill-temple","type":"FILL_LETTERS","prompt":"A building used for religious worship","answer":"EL","displayWord":"T_MP_E","letters":["E","L","A","I","O"],"blankPositions":[1,4],"maximumPoints":30,"active":true}
+]

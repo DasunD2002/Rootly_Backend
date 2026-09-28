@@ -51,6 +51,11 @@ public class MessageConstant {
     public static final String TRANSLATION_LOOKUP_SUCCESS = "val.translation.lookup.success";
     public static final String TRANSLATION_GLOSSARY_SUCCESS = "val.translation.glossary.success";
 
+    // Interactive Quiz Messages
+    public static final String QUIZ_DASHBOARD_SUCCESS = "val.quiz.dashboard.success";
+    public static final String QUIZ_SESSION_SUCCESS = "val.quiz.session.success";
+    public static final String QUIZ_ANSWER_SUCCESS = "val.quiz.answer.success";
+
     /*--------------- Post Messages ---------------*/
     public static final String POST_CREATE_SUCCESS = "val.post.create.success";
     public static final String POST_UPDATE_SUCCESS = "val.post.update.success";

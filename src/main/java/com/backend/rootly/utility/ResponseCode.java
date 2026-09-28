@@ -45,6 +45,11 @@ public class ResponseCode {
     public static final String TRANSLATION_LOOKUP_SUCCESS = "rootly-601";
     public static final String TRANSLATION_GLOSSARY_SUCCESS = "rootly-602";
 
+    // Interactive Quiz Response Codes
+    public static final String QUIZ_DASHBOARD_SUCCESS = "rootly-701";
+    public static final String QUIZ_SESSION_SUCCESS = "rootly-702";
+    public static final String QUIZ_ANSWER_SUCCESS = "rootly-703";
+
     // Post Response Codes
     public static final String POST_CREATE_SUCCESS = "rootly-601";
     public static final String POST_UPDATE_SUCCESS = "rootly-602";
