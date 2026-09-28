@@ -19,12 +19,9 @@ import com.backend.rootly.dto.request.ProvinceExploreRequestDTO;
 import com.backend.rootly.dto.request.InviteContributorRequestDTO;
 import com.backend.rootly.dto.request.LoginRequestDTO;
 import com.backend.rootly.dto.request.RegisterRequestDTO;
-<<<<<<< HEAD
 import com.backend.rootly.dto.request.UpdateCapsuleRequestDTO;
-=======
 import com.backend.rootly.dto.request.TranslationLookupRequestDTO;
 import com.backend.rootly.dto.request.ForumVoteRequestDTO;
->>>>>>> d9016c034ff668c739df1e6ab37bd3ced3a65295
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
@@ -47,14 +44,11 @@ public class MapperConfiguration {
         modelMapper.createTypeMap(LoginRequestDTO.class, UserLogin.class);
         modelMapper.createTypeMap(CreateCapsuleRequestDTO.class, CreateCapsuleDomain.class);
         modelMapper.createTypeMap(InviteContributorRequestDTO.class, InviteContributorDomain.class);
-<<<<<<< HEAD
         modelMapper.createTypeMap(UpdateCapsuleRequestDTO.class, UpdateCapsuleDomain.class);
-=======
         modelMapper.createTypeMap(CreateQuestionRequestDTO.class, CreateQuestionDomain.class);
         modelMapper.createTypeMap(CreateQuestionCommentRequestDTO.class, CreateQuestionCommentDomain.class);
         modelMapper.createTypeMap(ForumVoteRequestDTO.class, ForumVoteDomain.class);
         modelMapper.createTypeMap(TranslationLookupRequestDTO.class, TranslationLookup.class);
->>>>>>> d9016c034ff668c739df1e6ab37bd3ced3a65295
 
         modelMapper.validate();
         return modelMapper;
