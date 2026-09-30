@@ -340,7 +340,9 @@ public class CulturalPostImpl implements CulturalPostService {
             userRepository.findById(post.getUserId()).ifPresent(user -> {
                 dto.setAuthorName(user.getName());
                 dto.setAuthorPhoto(user.getPhotoUrl());
-                if (user.getName() != null) {
+                if (user.getHandle() != null) {
+                    dto.setAuthorHandle(user.getHandle());
+                } else if (user.getName() != null) {
                     dto.setAuthorHandle("@" + user.getName().replaceAll("\\s+", "").toLowerCase());
                 }
             });
