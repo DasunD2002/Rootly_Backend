@@ -1,13 +1,13 @@
 package com.backend.rootly.service.impl;
 
 import com.backend.rootly.client.WikidataProvinceClient;
+import com.backend.rootly.client.ProvincePhotoAssembler;
 import com.backend.rootly.config.ExploreProperties;
 import com.backend.rootly.domain.ExploreCatalog;
 import com.backend.rootly.domain.ProvinceCatalog;
 import com.backend.rootly.domain.ProvinceExploreRequest;
 import com.backend.rootly.dto.response.ExplorePlaceDTO;
 import com.backend.rootly.dto.response.ExplorePlacesResponseDTO;
-import com.backend.rootly.dto.response.ProvinceExploreResponseDTO;
 import com.backend.rootly.enums.ExploreProvince;
 import com.backend.rootly.exception.PlacesUnavailableException;
 import com.backend.rootly.service.ProvinceExploreService;
@@ -31,6 +31,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProvinceExploreServiceImpl implements ProvinceExploreService {
     private final WikidataProvinceClient client;
+    private final ProvincePhotoAssembler photos;
     private final Clock clock;
     private final ExploreProperties properties;
     private final Map<ExploreProvince, ProvinceCatalog> cached = new EnumMap<>(ExploreProvince.class);
@@ -55,7 +56,7 @@ public class ProvinceExploreServiceImpl implements ProvinceExploreService {
         ExplorePlacesResponseDTO paged = new ExplorePlacesResponseDTO(items, page, size,
                 matches.size(), start + items.size() < matches.size(),
                 "Wikidata", places.getFetchedAt(), !withinAge(result, properties.getCacheTtl()), places.isTruncated());
-        return ResponseEntity.ok(new ProvinceExploreResponseDTO(result.getProvince(), paged, result.getTraditions()));
+        return ResponseEntity.ok(photos.illustrate(province, result.getProvince(), result.getTraditions(), paged));
     }
 
     private static List<ExplorePlaceDTO> filterPlaces(List<ExplorePlaceDTO> places, String query) {

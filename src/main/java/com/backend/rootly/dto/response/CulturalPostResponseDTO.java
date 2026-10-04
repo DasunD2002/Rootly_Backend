@@ -16,6 +16,8 @@ public class CulturalPostResponseDTO {
     private String location;
     private List<String> tags;
     private String visibility;
+    private Boolean isDraft;
+    private Boolean isSaved;
     private List<String> proofs;
     
     private Integer likeCount;

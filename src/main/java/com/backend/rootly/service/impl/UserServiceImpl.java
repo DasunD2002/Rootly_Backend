@@ -22,6 +22,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ResponseGenerator responseGenerator;
     private final ModelMapper modelMapper;
+    private final UserFollowService userFollowService;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     @Override
@@ -32,12 +33,22 @@ public class UserServiceImpl implements UserService {
                     ResponseCode.USER_NOT_FOUND, MessageConstant.USER_NOT_FOUND, locale);
         }
         UserResponseDTO responseDTO = modelMapper.map(user, UserResponseDTO.class);
+        responseDTO.setFollowerCount(Math.toIntExact(userFollowService.countFollowers(userId)));
+        responseDTO.setFollowingCount(Math.toIntExact(userFollowService.countFollowing(userId)));
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserReg viewer)
+                || !userId.equals(viewer.getId())) {
+            responseDTO.setEmail(null);
+            responseDTO.setPhone(null);
+        }
         return responseGenerator.generateSuccessResponse(HttpStatus.OK,
                 ResponseCode.RSP_SUCCESS, MessageConstant.SUCCESSFULLY_GET, responseDTO);
     }
 
     @Override
     public ResponseEntity<Object> updateUserProfile(String userId, com.backend.rootly.dto.request.UserUpdateRequestDTO request, Locale locale) {
+        requireOwner(userId);
         UserReg user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return responseGenerator.generateErrorResponse(null, HttpStatus.NOT_FOUND,
@@ -54,12 +65,15 @@ public class UserServiceImpl implements UserService {
         user = userRepository.save(user);
 
         UserResponseDTO responseDTO = modelMapper.map(user, UserResponseDTO.class);
+        responseDTO.setFollowerCount(Math.toIntExact(userFollowService.countFollowers(userId)));
+        responseDTO.setFollowingCount(Math.toIntExact(userFollowService.countFollowing(userId)));
         return responseGenerator.generateSuccessResponse(HttpStatus.OK,
                 ResponseCode.RSP_SUCCESS, MessageConstant.SUCCESSFULLY_UPDATE, responseDTO);
     }
 
     @Override
     public ResponseEntity<Object> changePassword(String userId, com.backend.rootly.dto.request.ChangePasswordRequestDTO request, Locale locale) {
+        requireOwner(userId);
         UserReg user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return responseGenerator.generateErrorResponse(null, HttpStatus.NOT_FOUND,
@@ -76,5 +90,17 @@ public class UserServiceImpl implements UserService {
 
         return responseGenerator.generateSuccessResponse(HttpStatus.OK,
                 ResponseCode.RSP_SUCCESS, "Password changed successfully", null);
+    }
+
+    private static void requireOwner(String userId) {
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserReg user)) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please sign in.");
+        }
+        if (!userId.equals(user.getId())) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You can only update your own account.");
+        }
     }
 }
