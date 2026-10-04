@@ -43,6 +43,8 @@ public class CulturalPost {
     @Field("visibility")
     private String visibility;
 
+    private Boolean isDraft;
+
     @Field("proofs")
     private List<String> proofs;
 

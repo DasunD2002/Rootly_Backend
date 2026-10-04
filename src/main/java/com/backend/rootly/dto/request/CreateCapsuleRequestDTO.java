@@ -4,7 +4,6 @@ import com.backend.rootly.entity.UnlockCondition;
 import com.backend.rootly.enums.CapsulePrivacy;
 import com.backend.rootly.enums.CapsuleType;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,9 +19,14 @@ import java.util.List;
 @Builder
 public class CreateCapsuleRequestDTO {
 
-    @NotBlank(message = "creatorId is required")
-    private String creatorId;
+    public void validateUnlockCondition() {
+        if (unlockCondition != null) unlockCondition.validate(java.time.Clock.systemUTC());
+    }
 
+    private String creatorId;
+    private Boolean allowContributions;
+
+    @jakarta.validation.constraints.NotBlank(message = "title is required")
     @Size(max = 150, message = "title must not exceed 150 characters")
     private String title;
 
@@ -34,7 +38,6 @@ public class CreateCapsuleRequestDTO {
     @NotNull(message = "type is required")
     private CapsuleType type;
 
-    @NotNull(message = "unlockCondition is required")
     @Valid
     private UnlockCondition unlockCondition;
 

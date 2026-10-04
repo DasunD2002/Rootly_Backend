@@ -2,6 +2,7 @@ package com.backend.rootly.service.impl;
 
 import com.backend.rootly.client.WikidataPlacesClient;
 import com.backend.rootly.client.WikipediaPlaceDetailClient;
+import com.backend.rootly.client.WikimediaPhotoClient;
 import com.backend.rootly.config.ExploreProperties;
 import com.backend.rootly.domain.ExploreCatalog;
 import com.backend.rootly.domain.ExplorePlacesRequest;
@@ -36,6 +37,7 @@ public class ExplorePlacesServiceImpl implements ExplorePlacesService {
     private static final int MAX_PAGE_SIZE = 50;
     private final WikidataPlacesClient client;
     private final WikipediaPlaceDetailClient detailClient;
+    private final WikimediaPhotoClient photoClient;
     private final Clock clock;
     private final ExploreProperties properties;
     private ExploreCatalog cached;
@@ -63,7 +65,7 @@ public class ExplorePlacesServiceImpl implements ExplorePlacesService {
 
         long start = (long) page * size;
 
-        List<ExplorePlaceDTO> items = matches.stream().skip(start).limit(size).toList();
+        List<ExplorePlaceDTO> items = photoClient.enrichPlaces(matches.stream().skip(start).limit(size).toList());
 
         return ResponseEntity.ok(new ExplorePlacesResponseDTO(items, page, size, matches.size(), start + items.size() < matches.size(),
                 "Wikidata", catalog.getFetchedAt(), !isFresh(catalog), catalog.isTruncated()));
@@ -78,7 +80,7 @@ public class ExplorePlacesServiceImpl implements ExplorePlacesService {
                 .filter(item -> placeId.equals(item.getId()))
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Place was not found"));
-        return ResponseEntity.ok(detailClient.enrich(place));
+        return ResponseEntity.ok(photoClient.enrichPlaces(List.of(detailClient.enrich(place))).get(0));
     }
 
     @Override

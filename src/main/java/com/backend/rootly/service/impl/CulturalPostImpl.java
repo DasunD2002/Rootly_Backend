@@ -54,6 +54,7 @@ public class CulturalPostImpl implements CulturalPostService {
 
         CulturalPost post = new CulturalPost();
         post.setUserId(userId);
+        validatePublication(requestDTO.title(), requestDTO.story(), requestDTO.media(), requestDTO.category(), requestDTO.isDraft());
         post.setTitle(requestDTO.title());
         post.setStory(requestDTO.story());
         post.setMedia(requestDTO.media());
@@ -61,6 +62,7 @@ public class CulturalPostImpl implements CulturalPostService {
         post.setLocation(requestDTO.location());
         post.setTags(requestDTO.tags());
         post.setVisibility(requestDTO.visibility());
+        post.setIsDraft(Boolean.TRUE.equals(requestDTO.isDraft()));
         post.setProofs(requestDTO.proofs());
         post.setLikeCount(0);
         post.setShareCount(0);
@@ -101,6 +103,7 @@ public class CulturalPostImpl implements CulturalPostService {
                     ResponseCode.POST_FORBIDDEN, MessageConstant.POST_FORBIDDEN, locale);
         }
 
+        validatePublication(requestDTO.title(), requestDTO.story(), requestDTO.media(), requestDTO.category(), requestDTO.isDraft());
         post.setTitle(requestDTO.title());
         post.setStory(requestDTO.story());
         post.setMedia(requestDTO.media());
@@ -108,6 +111,7 @@ public class CulturalPostImpl implements CulturalPostService {
         post.setLocation(requestDTO.location());
         post.setTags(requestDTO.tags());
         post.setVisibility(requestDTO.visibility());
+        post.setIsDraft(Boolean.TRUE.equals(requestDTO.isDraft()));
         post.setProofs(requestDTO.proofs());
         post.setDisableComments(requestDTO.disableComments() != null ? requestDTO.disableComments() : false);
 
@@ -161,6 +165,7 @@ public class CulturalPostImpl implements CulturalPostService {
                     ResponseCode.POST_NOT_FOUND, MessageConstant.POST_NOT_FOUND, locale);
         }
 
+        requireVisible(optionalPost.get());
         CulturalPostResponseDTO responseDTO = mapToResponseDTO(optionalPost.get());
         return responseGenerator.generateSuccessResponse(null, HttpStatus.OK,
                 ResponseCode.POST_GET_SUCCESS, MessageConstant.SUCCESSFULLY_GET, locale, responseDTO);
@@ -173,6 +178,8 @@ public class CulturalPostImpl implements CulturalPostService {
         java.util.List<CulturalPost> posts = postRepository.findAll(sort);
 
         java.util.List<CulturalPostResponseDTO> responseDTOs = posts.stream()
+                .filter(post -> !Boolean.TRUE.equals(post.getIsDraft()))
+                .filter(this::isVisible)
                 .map(this::mapToResponseDTO)
                 .toList();
 
@@ -206,10 +213,13 @@ public class CulturalPostImpl implements CulturalPostService {
             user.setSavedPosts(new java.util.ArrayList<>());
         }
         
-        if (!user.getSavedPosts().contains(postId)) {
+        requireVisible(optionalPost.get());
+        if (user.getSavedPosts().contains(postId)) {
+            user.getSavedPosts().remove(postId);
+        } else {
             user.getSavedPosts().add(postId);
-            userRepository.save(user);
         }
+        userRepository.save(user);
 
         return responseGenerator.generateSuccessResponse(null, HttpStatus.OK,
                 ResponseCode.RSP_SUCCESS, MessageConstant.SUCCESSFULLY_SAVE, locale, null);
@@ -234,7 +244,7 @@ public class CulturalPostImpl implements CulturalPostService {
         
         Iterable<CulturalPost> savedPosts = postRepository.findAllById(savedPostIds);
         java.util.List<CulturalPostResponseDTO> responseDTOs = new java.util.ArrayList<>();
-        savedPosts.forEach(post -> responseDTOs.add(mapToResponseDTO(post)));
+        savedPosts.forEach(post -> { if (isVisible(post)) responseDTOs.add(mapToResponseDTO(post)); });
 
         return responseGenerator.generateSuccessResponse(null, HttpStatus.OK,
                 ResponseCode.POST_GET_SUCCESS, MessageConstant.SUCCESSFULLY_GET, locale, responseDTOs);
@@ -253,6 +263,8 @@ public class CulturalPostImpl implements CulturalPostService {
         java.util.List<CulturalPost> posts = postRepository.findByUserId(userId, sort);
 
         java.util.List<CulturalPostResponseDTO> responseDTOs = posts.stream()
+                .filter(post -> !Boolean.TRUE.equals(post.getIsDraft()))
+                .filter(this::isVisible)
                 .map(this::mapToResponseDTO)
                 .toList();
 
@@ -275,6 +287,7 @@ public class CulturalPostImpl implements CulturalPostService {
         }
 
         CulturalPost post = optionalPost.get();
+        requireVisible(post);
         if (post.getLikedBy() == null) {
             post.setLikedBy(new java.util.ArrayList<>());
         }
@@ -311,7 +324,9 @@ public class CulturalPostImpl implements CulturalPostService {
                     ResponseCode.POST_NOT_FOUND, MessageConstant.POST_NOT_FOUND, locale);
         }
 
+        validateComment(text);
         CulturalPost post = optionalPost.get();
+        requireVisible(post);
         if (Boolean.TRUE.equals(post.getDisableComments())) {
             return responseGenerator.generateErrorResponse(null, HttpStatus.FORBIDDEN,
                     ResponseCode.RSP_ERROR, "Comments are disabled", locale);
@@ -334,6 +349,34 @@ public class CulturalPostImpl implements CulturalPostService {
                 ResponseCode.RSP_SUCCESS, "Successfully added comment", locale, null);
     }
 
+    private static void validateComment(String text) {
+        if (text == null || text.isBlank() || text.length() > 6_000) {
+            throw new IllegalArgumentException("Comment must contain 1 to 6000 characters.");
+        }
+    }
+
+    private static void validatePublication(String title, String story, String media, String category, Boolean draft) {
+        if (Boolean.TRUE.equals(draft)) {
+            return;
+        }
+        for (String field : java.util.Arrays.asList(title, story, media, category)) {
+            if (field == null || field.isBlank()) {
+                throw new IllegalArgumentException("Title, story, media and category are required to publish.");
+            }
+        }
+    }
+
+    private boolean isVisible(CulturalPost post) {
+        return java.util.Objects.equals(getLoggedUserId(), post.getUserId())
+                || (!Boolean.TRUE.equals(post.getIsDraft()) && !"private".equalsIgnoreCase(post.getVisibility()));
+    }
+
+    private void requireVisible(CulturalPost post) {
+        if (!isVisible(post)) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found.");
+        }
+    }
+
     private CulturalPostResponseDTO mapToResponseDTO(CulturalPost post) {
         CulturalPostResponseDTO dto = modelMapper.map(post, CulturalPostResponseDTO.class);
         if (post.getUserId() != null) {
@@ -349,6 +392,8 @@ public class CulturalPostImpl implements CulturalPostService {
         }
         
         String currentUserId = getLoggedUserId();
+        dto.setIsSaved(currentUserId != null && userRepository.findById(currentUserId)
+                .map(user -> user.getSavedPosts() != null && user.getSavedPosts().contains(post.getId())).orElse(false));
         if (currentUserId != null && post.getLikedBy() != null) {
             dto.setIsLiked(post.getLikedBy().contains(currentUserId));
         } else {

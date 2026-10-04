@@ -10,6 +10,7 @@ import com.backend.rootly.enums.CapsulePrivacy;
 import com.backend.rootly.enums.CapsuleStatus;
 import com.backend.rootly.enums.CapsuleType;
 import com.backend.rootly.repository.CapsuleRepository;
+import com.backend.rootly.repository.UserRepository;
 import com.backend.rootly.utility.ResponseCode;
 import com.backend.rootly.utility.ResponseGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,18 +36,29 @@ import static org.mockito.Mockito.when;
 class CapsuleServiceImplTests {
 
     private CapsuleRepository capsuleRepository;
+    private UserRepository userRepository;
     private CapsuleServiceImpl capsuleService;
     private Clock clock;
 
     @BeforeEach
     void setUp() {
+        com.backend.rootly.entity.UserReg user = new com.backend.rootly.entity.UserReg();
+        user.setId("user-1");
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(user, null));
         capsuleRepository = mock(CapsuleRepository.class);
+        userRepository = mock(UserRepository.class);
         clock = Clock.systemUTC();
         MessageSource messageSource = mock(MessageSource.class);
         ModelMapper modelMapper = new ModelMapper();
         ResponseGenerator responseGenerator = new ResponseGenerator(modelMapper, messageSource);
 
-        capsuleService = new CapsuleServiceImpl(capsuleRepository, responseGenerator, modelMapper, clock);
+        capsuleService = new CapsuleServiceImpl(capsuleRepository, userRepository, responseGenerator, modelMapper, clock);
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    void clearAuthentication() {
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -113,6 +125,7 @@ class CapsuleServiceImplTests {
 
         when(capsuleRepository.findById("capsule-1")).thenReturn(Optional.of(existing));
         when(capsuleRepository.save(any(Capsule.class))).thenReturn(existing);
+        when(userRepository.existsById("user-2")).thenReturn(true);
 
         ResponseEntity<Object> response = capsuleService.inviteContributor("capsule-1", request, Locale.ENGLISH);
 
@@ -121,6 +134,22 @@ class CapsuleServiceImplTests {
         ResponseDTO dto = (ResponseDTO) response.getBody();
         assertThat(dto.getResponseCode()).isEqualTo(ResponseCode.CAPSULE_INVITE_SUCCESS);
         verify(capsuleRepository).save(existing);
+    }
+
+    @Test
+    void inviteContributorRejectsMissingAccountWithoutSavingCapsule() {
+        Capsule existing = Capsule.builder().id("capsule-1").creatorId("user-1")
+                .status(CapsuleStatus.OPEN).contributorIds(new ArrayList<>()).build();
+        when(capsuleRepository.findById("capsule-1")).thenReturn(Optional.of(existing));
+        InviteContributorDomain request = InviteContributorDomain.builder()
+                .contributorId("unknown-user").build();
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                () -> capsuleService.inviteContributor("capsule-1", request, Locale.ENGLISH))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .satisfies(error -> assertThat(
+                        ((org.springframework.web.server.ResponseStatusException) error).getStatusCode())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
+        org.mockito.Mockito.verify(capsuleRepository, org.mockito.Mockito.never()).save(any(Capsule.class));
     }
 
     @Test
