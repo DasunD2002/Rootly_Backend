@@ -32,6 +32,7 @@ import java.util.Locale;
 @CrossOrigin
 @RequiredArgsConstructor
 @Log4j2
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class CapsuleController {
 
     private final CapsuleService capsuleService;
