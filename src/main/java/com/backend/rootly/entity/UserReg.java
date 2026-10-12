@@ -46,6 +46,15 @@ public class UserReg {
     @Field("photoUrl")
     private String photoUrl;
 
+    @Field("coverUrl")
+    private String coverUrl;
+
+    @Field("bio")
+    private String bio;
+
+    @Field("handle")
+    private String handle;
+
     @Field("district")
     private String district;
 

@@ -32,6 +32,13 @@ public class ExceptionHandlerController {
 
     private final ResponseGenerator responseGenerator;
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<Object> handleResponseStatus(org.springframework.web.server.ResponseStatusException exception) {
+        return ResponseEntity.status(exception.getStatusCode())
+                .body(java.util.Map.of("errorDescription", exception.getReason() == null
+                        ? "Request failed" : exception.getReason()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         StringBuilder details = new StringBuilder();

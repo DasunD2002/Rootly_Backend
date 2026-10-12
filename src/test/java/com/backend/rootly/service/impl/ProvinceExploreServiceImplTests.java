@@ -2,6 +2,8 @@ package com.backend.rootly.service.impl;
 
 import com.backend.rootly.client.WikidataProvinceClient;
 import com.backend.rootly.config.ExploreProperties;
+import com.backend.rootly.client.WikimediaPhotoClient;
+import com.backend.rootly.client.ProvincePhotoAssembler;
 import com.backend.rootly.domain.ProvinceCatalog;
 import com.backend.rootly.domain.ProvinceExploreRequest;
 import com.backend.rootly.dto.response.ProvinceExploreResponseDTO;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 class ProvinceExploreServiceImplTests {
     private final WikidataProvinceClient client = mock(WikidataProvinceClient.class);
+    private final WikimediaPhotoClient photoClient = mock(WikimediaPhotoClient.class);
     private final Clock clock = mock(Clock.class);
     private final Instant fetchedAt = Instant.parse("2026-01-01T00:00:00Z");
     private ProvinceExploreServiceImpl service;
@@ -40,6 +43,10 @@ class ProvinceExploreServiceImplTests {
     @BeforeEach
     void setUp() throws IOException {
         when(clock.instant()).thenReturn(fetchedAt);
+        org.mockito.Mockito.when(photoClient.enrichPlaces(org.mockito.ArgumentMatchers.anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        org.mockito.Mockito.when(photoClient.resolve(org.mockito.ArgumentMatchers.anyList()))
+                .thenReturn(java.util.Map.of());
         JsonMapper json = JsonMapper.builder().build();
         catalog = new WikidataProvinceMapper(new WikidataPlaceMapper(), json).map(json.readTree(
                 new ClassPathResource("explore-province-fixture.json").getContentAsString(StandardCharsets.UTF_8)),
@@ -48,7 +55,7 @@ class ProvinceExploreServiceImplTests {
         ExploreProperties properties = new ExploreProperties();
         properties.setCacheTtl(Duration.ofMinutes(10));
         properties.setMaxStale(Duration.ofHours(1));
-        service = new ProvinceExploreServiceImpl(client, clock, properties);
+        service = new ProvinceExploreServiceImpl(client, new ProvincePhotoAssembler(photoClient), clock, properties);
     }
 
     private ProvinceExploreResponseDTO explore(String province, int page, int size) {

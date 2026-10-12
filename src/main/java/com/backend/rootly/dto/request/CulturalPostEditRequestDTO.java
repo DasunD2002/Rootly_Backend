@@ -10,17 +10,13 @@ import java.util.List;
 public record CulturalPostEditRequestDTO(
 
         @Size(max = 60, message = "Maximum character limit is 60")
-        @NotBlank(message = "Title can't be empty")
         String title,
 
         @Size(max = 6000, message = "Maximum character limit is 6000")
-        @NotBlank(message = "Story can't be empty")
         String story,
 
-        @NotBlank(message = "Need to provide Video or Image")
         String media,
 
-        @NotBlank(message = "Category can't be empty")
         String category,
 
         String location,
@@ -32,6 +28,7 @@ public record CulturalPostEditRequestDTO(
 
         List<String> proofs,
 
-        Boolean disableComments
+        Boolean disableComments,
+        Boolean isDraft
 ) {
 }

@@ -3,6 +3,7 @@ package com.backend.rootly.service.impl;
 import com.backend.rootly.client.WikidataPlacesClient;
 import com.backend.rootly.client.WikipediaPlaceDetailClient;
 import com.backend.rootly.config.ExploreProperties;
+import com.backend.rootly.client.WikimediaPhotoClient;
 import com.backend.rootly.domain.ExploreCatalog;
 import com.backend.rootly.domain.ExplorePlacesRequest;
 import com.backend.rootly.dto.response.ExploreCategoryResponseDTO;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.when;
 class ExplorePlacesServiceImplTests {
     private final WikidataPlacesClient client = mock(WikidataPlacesClient.class);
     private final WikipediaPlaceDetailClient detailClient = mock(WikipediaPlaceDetailClient.class);
+    private final WikimediaPhotoClient photoClient = mock(WikimediaPhotoClient.class);
     private final Clock clock = mock(Clock.class);
     private final Instant fetchedAt = Instant.parse("2026-01-01T00:00:00Z");
     private ExplorePlacesService service;
@@ -42,13 +44,17 @@ class ExplorePlacesServiceImplTests {
     @BeforeEach
     void setUp() throws IOException {
         when(clock.instant()).thenReturn(fetchedAt);
+        org.mockito.Mockito.when(photoClient.enrichPlaces(org.mockito.ArgumentMatchers.anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        org.mockito.Mockito.when(photoClient.resolve(org.mockito.ArgumentMatchers.anyList()))
+                .thenReturn(java.util.Map.of());
         catalog = new WikidataPlaceMapper().map(JsonMapper.builder().build().readTree(
                 new ClassPathResource("explore-places-fixture.json").getContentAsString(StandardCharsets.UTF_8)), fetchedAt);
         when(client.fetch()).thenReturn(catalog);
         ExploreProperties properties = new ExploreProperties();
         properties.setCacheTtl(Duration.ofMinutes(10));
         properties.setMaxStale(Duration.ofHours(1));
-        service = new ExplorePlacesServiceImpl(client, detailClient, clock, properties);
+        service = new ExplorePlacesServiceImpl(client, detailClient, photoClient, clock, properties);
     }
 
     private ExplorePlacesResponseDTO search(String query, String category, int page, int size) {

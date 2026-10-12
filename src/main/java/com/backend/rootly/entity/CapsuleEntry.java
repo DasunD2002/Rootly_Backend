@@ -39,6 +39,9 @@ public class CapsuleEntry {
     @Field("content")
     private String content;
 
+    private String caption;
+    private Boolean archived;
+
     @CreatedDate
     @Field("createdAt")
     private Instant createdAt;

@@ -30,6 +30,17 @@ public class UnlockCondition {
     @Field("occasionName")
     private String occasionName;
 
+    public boolean hasUnlocked() {
+        return type == UnlockConditionType.DATE && date != null && !date.isAfter(Instant.now());
+    }
+
+    public void validateDateSealing() {
+        if (type != UnlockConditionType.DATE) {
+            throw new IllegalArgumentException("Set a future unlock date in Edit Capsule Details first.");
+        }
+        validate(Clock.systemUTC());
+    }
+
     public void validate(Clock clock) {
         if (this.type == null) {
             throw new IllegalArgumentException("unlockCondition.type is required");

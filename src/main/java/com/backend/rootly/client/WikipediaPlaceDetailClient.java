@@ -49,7 +49,7 @@ public class WikipediaPlaceDetailClient {
     private ExplorePlaceDTO fetch(ExplorePlaceDTO place, String title) {
         URI requestUri = URI.create(properties.getWikipediaUrl() + "?action=query&format=json&formatversion=2"
                 + "&prop=extracts%7Cpageimages&explaintext=1&exintro=1"
-                + "&piprop=thumbnail%7Cname&pithumbsize=1200&titles="
+                + "&piprop=thumbnail%7Cname&pithumbsize=960&pilicense=free&titles="
                 + URLEncoder.encode(title, StandardCharsets.UTF_8));
         HttpRequest request = HttpRequest.newBuilder(requestUri)
                 .timeout(Duration.ofSeconds(8))
@@ -90,7 +90,7 @@ public class WikipediaPlaceDetailClient {
         String extract = text(page.path("extract"));
         String thumbnail = text(page.path("thumbnail").path("source"));
         String imageName = text(page.path("pageimage"));
-        String image = thumbnail != null && thumbnail.startsWith("https://upload.wikimedia.org/")
+        String image = WikimediaPhotoClient.trustedImage(thumbnail)
                 ? thumbnail : null;
         String imageSource = image != null && imageName != null
                 ? "https://en.wikipedia.org/wiki/File:"

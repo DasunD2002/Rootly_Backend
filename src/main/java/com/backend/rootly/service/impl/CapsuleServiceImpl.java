@@ -8,6 +8,7 @@ import com.backend.rootly.entity.Capsule;
 import com.backend.rootly.enums.CapsulePrivacy;
 import com.backend.rootly.enums.CapsuleStatus;
 import com.backend.rootly.repository.CapsuleRepository;
+import com.backend.rootly.repository.UserRepository;
 import com.backend.rootly.service.CapsuleService;
 import com.backend.rootly.utility.MessageConstant;
 import com.backend.rootly.utility.ResponseCode;
@@ -33,16 +34,19 @@ import java.util.Set;
 public class CapsuleServiceImpl implements CapsuleService {
 
     private final CapsuleRepository capsuleRepository;
+    private final UserRepository userRepository;
     private final ResponseGenerator responseGenerator;
     private final ModelMapper modelMapper;
     private final Clock clock;
 
     @Autowired
     public CapsuleServiceImpl(CapsuleRepository capsuleRepository,
+                              UserRepository userRepository,
                               ResponseGenerator responseGenerator,
                               ModelMapper modelMapper,
                               @Autowired(required = false) Clock clock) {
         this.capsuleRepository = capsuleRepository;
+        this.userRepository = userRepository;
         this.responseGenerator = responseGenerator;
         this.modelMapper = modelMapper;
         this.clock = clock != null ? clock : Clock.systemUTC();
@@ -62,7 +66,8 @@ public class CapsuleServiceImpl implements CapsuleService {
 
         Instant now = Instant.now(clock);
         Capsule capsule = Capsule.builder()
-                .creatorId(request.getCreatorId() != null ? request.getCreatorId().trim() : null)
+                .creatorId(requireUserId())
+                .allowContributions(true)
                 .title(trimToNull(request.getTitle()))
                 .description(trimToNull(request.getDescription()))
                 .coverPhotoUrl(trimToNull(request.getCoverPhotoUrl()))
@@ -95,11 +100,19 @@ public class CapsuleServiceImpl implements CapsuleService {
         String contributorId = requireContributorId(request);
 
         Capsule capsule = capsuleRepository.findById(normalizedCapsuleId).orElse(null);
-        if (capsule == null) {
+        if (capsule == null || Boolean.TRUE.equals(capsule.getArchived())) {
             return responseGenerator.generateErrorResponse(request, HttpStatus.NOT_FOUND,
                     ResponseCode.CAPSULE_NOT_FOUND, MessageConstant.CAPSULE_NOT_FOUND, locale);
         }
 
+        if (!requireUserId().equals(capsule.getCreatorId())) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only the creator can invite contributors.");
+        }
+        if (!userRepository.existsById(contributorId)) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Contributor account not found.");
+        }
         List<String> contributorIds = cleanIds(capsule.getContributorIds());
         capsule.validateForInvitation(contributorId, contributorIds);
 
@@ -208,6 +221,15 @@ public class CapsuleServiceImpl implements CapsuleService {
 
         return responseGenerator.generateSuccessResponse(HttpStatus.OK,
                 ResponseCode.CAPSULE_DELETE_SUCCESS, MessageConstant.CAPSULE_DELETE_SUCCESS, null);
+    }
+
+    private static String requireUserId() {
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof com.backend.rootly.entity.UserReg user) {
+            return user.getId();
+        }
+        throw new org.springframework.web.server.ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please sign in.");
     }
 
     private static String requireContributorId(InviteContributorDomain request) {

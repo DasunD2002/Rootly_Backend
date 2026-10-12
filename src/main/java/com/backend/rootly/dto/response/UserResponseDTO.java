@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SuppressWarnings("PMD.TooManyFields")
 public class UserResponseDTO {
 
     private String id;
@@ -19,6 +20,9 @@ public class UserResponseDTO {
     private String phone;
     private String gender;
     private String photoUrl;
+    private String coverUrl;
+    private String bio;
+    private String handle;
     private String district;
     private List<String> languages;
     private String role;

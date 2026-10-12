@@ -50,12 +50,12 @@ class WikipediaPlaceDetailClientTests {
         AtomicInteger requests = new AtomicInteger();
         server.createContext("/api.php", exchange -> {
             requests.incrementAndGet();
-            assertThat(exchange.getRequestURI().getRawQuery()).contains("titles=Gal+Vihara", "exintro=1");
+            assertThat(exchange.getRequestURI().getRawQuery()).contains("titles=Gal+Vihara", "exintro=1", "pithumbsize=960", "pilicense=free");
             byte[] body = ("""
                     {"query":{"pages":[{"title":"Gal Vihara",
                       "extract":"A detailed first paragraph.\\n\\nA second paragraph about the sculptures.",
                       "pageimage":"Gal Vihara.jpg",
-                      "thumbnail":{"source":"https://upload.wikimedia.org/wikipedia/commons/thumb/example.jpg"}}]}}
+                      "thumbnail":{"source":"https://thumb.wikimedia.org/wikipedia/commons/thumb/example.jpg"}}]}}
                     """).getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, body.length);
             try (var output = exchange.getResponseBody()) {
@@ -64,7 +64,7 @@ class WikipediaPlaceDetailClientTests {
         });
         ExplorePlaceDTO result = client.enrich(place("https://en.wikipedia.org/wiki/Gal_Vihara"));
         assertThat(result.getDescription()).contains("second paragraph");
-        assertThat(result.getImageUrl()).startsWith("https://upload.wikimedia.org/");
+        assertThat(result.getImageUrl()).startsWith("https://thumb.wikimedia.org/");
         assertThat(result.getImageSourceUrl()).isEqualTo("https://en.wikipedia.org/wiki/File:Gal%20Vihara.jpg");
         assertThat(result.getSourceUrl()).isEqualTo("https://www.wikidata.org/wiki/Q100");
         assertThat(client.enrich(place("https://en.wikipedia.org/wiki/Gal_Vihara"))).isSameAs(result);

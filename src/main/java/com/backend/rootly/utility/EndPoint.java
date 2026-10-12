@@ -7,6 +7,7 @@ public final class EndPoint {
     }
 
     public static final String API = "/api";
+    public static final String ACCOUNT_DATA = "/v1/me/data/{key}";
 
     // Auth Endpoints
     public static final String AUTH_REGISTER = "/v1/auth/register";
@@ -33,6 +34,11 @@ public final class EndPoint {
     // Translation Endpoints
     public static final String TRANSLATION_LOOKUP = "/v1/translations/lookup";
     public static final String TRANSLATION_GLOSSARY = "/v1/translations/glossary";
+
+    // Interactive Quiz Endpoints
+    public static final String QUIZ_DASHBOARD = "/v1/quizzes/dashboard";
+    public static final String QUIZ_SESSIONS = "/v1/quizzes/sessions";
+    public static final String QUIZ_ANSWERS = "/v1/quizzes/sessions/{sessionId}/answers";
 
     // Explore Endpoints
     public static final String EXPLORE_PLACES = "/v1/explore/places";

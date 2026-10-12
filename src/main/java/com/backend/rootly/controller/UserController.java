@@ -33,4 +33,26 @@ public class UserController {
         }
         return userService.getUserById(userId, locale);
     }
+
+    @org.springframework.web.bind.annotation.PutMapping(value = {EndPoint.USER_PROFILE, "/users/{userId}"}, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> updateUserProfile(
+            @PathVariable String userId,
+            @org.springframework.web.bind.annotation.RequestBody com.backend.rootly.dto.request.UserUpdateRequestDTO request,
+            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Update User Profile request for id: {}", userId);
+        }
+        return userService.updateUserProfile(userId, request, locale);
+    }
+
+    @org.springframework.web.bind.annotation.PutMapping(value = {EndPoint.USER_PROFILE + "/password", "/users/{userId}/password"}, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> changePassword(
+            @PathVariable String userId,
+            @org.springframework.validation.annotation.Validated @org.springframework.web.bind.annotation.RequestBody com.backend.rootly.dto.request.ChangePasswordRequestDTO request,
+            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Change Password request for id: {}", userId);
+        }
+        return userService.changePassword(userId, request, locale);
+    }
 }
