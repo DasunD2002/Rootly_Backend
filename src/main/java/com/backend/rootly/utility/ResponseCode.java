@@ -17,6 +17,8 @@ public class ResponseCode {
     public static final String USER_NOT_FOUND = "rootly-103";
     public static final String INVALID_CREDENTIALS = "rootly-104";
     public static final String EMAIL_ALREADY_EXISTS = "rootly-105";
+    public static final String GOOGLE_AUTH_SUCCESS = "rootly-106";
+    public static final String GOOGLE_TOKEN_INVALID = "rootly-107";
 
     // Capsule Response Codes
     public static final String CAPSULE_CREATE_SUCCESS = "rootly-201";
