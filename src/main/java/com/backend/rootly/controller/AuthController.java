@@ -2,6 +2,7 @@ package com.backend.rootly.controller;
 
 import com.backend.rootly.domain.UserLogin;
 import com.backend.rootly.domain.UserRegister;
+import com.backend.rootly.dto.request.GoogleAuthRequestDTO;
 import com.backend.rootly.dto.request.LoginRequestDTO;
 import com.backend.rootly.dto.request.RegisterRequestDTO;
 import com.backend.rootly.service.AuthService;
@@ -51,5 +52,20 @@ public class AuthController {
         }
         UserLogin userLogin = modelMapper.map(requestDTO, UserLogin.class);
         return authService.authenticate(userLogin, locale);
+    }
+
+    /**
+     * Google Sign-In / Sign-Up endpoint.
+     * The Flutter client sends the Google ID token; the backend verifies it
+     * with Google, then issues its own JWT (same shape as the regular login response).
+     */
+    @PostMapping(value = {EndPoint.AUTH_GOOGLE, "/auth/google"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> googleAuth(
+            @Validated @RequestBody GoogleAuthRequestDTO requestDTO,
+            @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Google Auth request");
+        }
+        return authService.googleAuth(requestDTO.getIdToken(), requestDTO.getLanguages(), locale);
     }
 }

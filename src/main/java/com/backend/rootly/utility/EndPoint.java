@@ -11,6 +11,7 @@ public final class EndPoint {
     // Auth Endpoints
     public static final String AUTH_REGISTER = "/v1/auth/register";
     public static final String AUTH_LOGIN = "/v1/auth/login";
+    public static final String AUTH_GOOGLE = "/v1/auth/google";
 
     // Capsule Endpoints
     public static final String CAPSULES = "/v1/capsules";

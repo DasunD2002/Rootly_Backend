@@ -7,20 +7,24 @@ import com.backend.rootly.dto.response.RegisterResponseDTO;
 import com.backend.rootly.entity.UserReg;
 import com.backend.rootly.repository.UserRepository;
 import com.backend.rootly.service.AuthService;
+import com.backend.rootly.service.security.GoogleTokenVerifierService;
 import com.backend.rootly.service.security.JwtService;
 import com.backend.rootly.utility.MessageConstant;
 import com.backend.rootly.utility.ResponseCode;
 import com.backend.rootly.utility.ResponseGenerator;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Log4j2
@@ -31,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final ResponseGenerator responseGenerator;
+    private final GoogleTokenVerifierService googleTokenVerifierService;
 
     @Override
     @Transactional
@@ -107,5 +112,76 @@ public class AuthServiceImpl implements AuthService {
 
         return responseGenerator.generateSuccessResponse(request, HttpStatus.OK,
                 ResponseCode.AUTH_LOGIN_SUCCESS, MessageConstant.AUTH_LOGIN_SUCCESS, locale, responseDTO);
+    }
+
+    /**
+     * Verifies the Google ID token provided by the Flutter client.
+     * If the user exists → login. If not → auto-register with Google profile data.
+     * Returns the same {@link LoginResponseDTO} shape used by regular login.
+     */
+    @Override
+    @Transactional
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+    public ResponseEntity<Object> googleAuth(String idToken, List<String> preferredLanguages, Locale locale) {
+        Payload payload = googleTokenVerifierService.verify(idToken);
+        if (payload == null) {
+            return responseGenerator.generateErrorResponse(
+                    idToken, HttpStatus.UNAUTHORIZED,
+                    ResponseCode.GOOGLE_TOKEN_INVALID, MessageConstant.GOOGLE_TOKEN_INVALID, locale);
+        }
+
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
+        String pictureUrl = (String) payload.get("picture");
+
+        Optional<UserReg> existingUser = userRepository.findByEmail(email);
+
+        UserReg user;
+        if (existingUser.isPresent()) {
+            // Existing user — just update profile picture if missing
+            user = existingUser.get();
+            if (user.getPhotoUrl() == null && pictureUrl != null) {
+                user.setPhotoUrl(pictureUrl);
+                user = userRepository.save(user);
+            }
+            if (log.isInfoEnabled()) {
+                log.info("Google login for existing user: {}", email);
+            }
+        } else {
+            // New user — auto-register with Google profile data
+            user = new UserReg();
+            user.setName(name != null ? name : email);
+            user.setEmail(email);
+            // Generate a secure random password; the user can never use it directly
+            user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+            user.setPhotoUrl(pictureUrl);
+            user.setLanguages(preferredLanguages != null && !preferredLanguages.isEmpty()
+                    ? preferredLanguages : List.of("English"));
+            user.setRole("USER");
+            user.setVerificationStatus("VERIFIED"); // Google already verified the email
+            user.setFollowerCount(0);
+            user.setFollowingCount(0);
+            user.setIsOtpVerified(true); // Email verified by Google
+            user.setProfileVisibility("PUBLIC");
+            user.setShowActivity(true);
+            user = userRepository.save(user);
+            if (log.isInfoEnabled()) {
+                log.info("Auto-registered new Google user: {}", email);
+            }
+        }
+
+        String jwtToken = jwtService.generateToken(user.getEmail());
+
+        LoginResponseDTO responseDTO = LoginResponseDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .verificationStatus(user.getVerificationStatus())
+                .token(jwtToken)
+                .build();
+
+        return responseGenerator.generateSuccessResponse(idToken, HttpStatus.OK,
+                ResponseCode.GOOGLE_AUTH_SUCCESS, MessageConstant.GOOGLE_AUTH_SUCCESS, locale, responseDTO);
     }
 }
