@@ -8,6 +8,7 @@ import com.backend.rootly.dto.response.LoginResponseDTO;
 import com.backend.rootly.dto.response.RegisterResponseDTO;
 import com.backend.rootly.entity.UserReg;
 import com.backend.rootly.repository.UserRepository;
+import com.backend.rootly.service.security.GoogleTokenVerifierService;
 import com.backend.rootly.service.security.JwtService;
 import com.backend.rootly.utility.ResponseCode;
 import com.backend.rootly.utility.ResponseGenerator;
@@ -44,8 +45,9 @@ class AuthServiceImplTests {
         MessageSource messageSource = mock(MessageSource.class);
         ModelMapper modelMapper = new ModelMapper();
         ResponseGenerator responseGenerator = new ResponseGenerator(modelMapper, messageSource);
+        GoogleTokenVerifierService googleTokenVerifierService = mock(GoogleTokenVerifierService.class);
 
-        authService = new AuthServiceImpl(userRepository, passwordEncoder, jwtService, responseGenerator);
+        authService = new AuthServiceImpl(userRepository, passwordEncoder, jwtService, responseGenerator, googleTokenVerifierService);
     }
 
     @Test
