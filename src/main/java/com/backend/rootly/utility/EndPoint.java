@@ -7,6 +7,7 @@ public final class EndPoint {
     }
 
     public static final String API = "/api";
+    public static final String ACCOUNT_DATA = "/v1/me/data/{key}";
 
     // Auth Endpoints
     public static final String AUTH_REGISTER = "/v1/auth/register";

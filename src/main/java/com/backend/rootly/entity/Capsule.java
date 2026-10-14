@@ -32,6 +32,12 @@ public class Capsule {
     @Id
     private String id;
 
+    @org.springframework.data.annotation.Transient
+    private long memoryCount;
+
+    private Boolean archived;
+    private Boolean allowContributions;
+
     @Indexed
     @Field("creatorId")
     private String creatorId;
@@ -81,6 +87,30 @@ public class Capsule {
     @LastModifiedDate
     @Field("updatedAt")
     private Instant updatedAt;
+
+    public void requireOpen() {
+        if (status != CapsuleStatus.OPEN) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "A sealed capsule cannot be changed.");
+        }
+    }
+
+    public boolean isLocked() {
+        return status == CapsuleStatus.SEALED && !hasUnlocked();
+    }
+
+    private boolean hasUnlocked() {
+        return unlockCondition != null && unlockCondition.hasUnlocked();
+    }
+
+    public void validateSealing() {
+        requireOpen();
+        if (unlockCondition == null) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Set a future unlock date in Edit Capsule Details first.");
+        }
+        unlockCondition.validateDateSealing();
+    }
 
     public void validateForInvitation(String contributorId, List<String> cleanedContributorIds) {
         if (this.status != CapsuleStatus.OPEN) {
