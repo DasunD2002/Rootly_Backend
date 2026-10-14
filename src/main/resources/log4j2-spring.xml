@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_DIRECTORY">${env:ROOTLY_LOG_PATH:-logs}</Property>
+        <Property name="LOG_PATTERN">[%X{traceId}][%X{REQ_ID}][%X{NAME}][%level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1}:%L - %msg%n</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT"><PatternLayout pattern="${LOG_PATTERN}"/></Console>
+        <RollingFile name="DebugFile" fileName="${LOG_DIRECTORY}/ROOTLY-DEBUG.log"
+                     filePattern="${LOG_DIRECTORY}/archive/ROOTLY-DEBUG-%d{yyyy-MM-dd}-%i.log.gz">
+            <LevelMatchFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies><TimeBasedTriggeringPolicy/><SizeBasedTriggeringPolicy size="10 MB"/></Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        <RollingFile name="InfoFile" fileName="${LOG_DIRECTORY}/ROOTLY-INFO.log"
+                     filePattern="${LOG_DIRECTORY}/archive/ROOTLY-INFO-%d{yyyy-MM-dd}-%i.log.gz">
+            <LevelMatchFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies><TimeBasedTriggeringPolicy/><SizeBasedTriggeringPolicy size="10 MB"/></Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        <RollingFile name="WarnFile" fileName="${LOG_DIRECTORY}/ROOTLY-WARN.log"
+                     filePattern="${LOG_DIRECTORY}/archive/ROOTLY-WARN-%d{yyyy-MM-dd}-%i.log.gz">
+            <LevelMatchFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies><TimeBasedTriggeringPolicy/><SizeBasedTriggeringPolicy size="10 MB"/></Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        <RollingFile name="ErrorFile" fileName="${LOG_DIRECTORY}/ROOTLY-ERROR.log"
+                     filePattern="${LOG_DIRECTORY}/archive/ROOTLY-ERROR-%d{yyyy-MM-dd}-%i.log.gz">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies><TimeBasedTriggeringPolicy/><SizeBasedTriggeringPolicy size="10 MB"/></Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.backend.rootly" level="${env:ROOTLY_LOG_LEVEL:-debug}" additivity="false">
+            <AppenderRef ref="Console"/><AppenderRef ref="DebugFile"/><AppenderRef ref="InfoFile"/>
+            <AppenderRef ref="WarnFile"/><AppenderRef ref="ErrorFile"/>
+        </Logger>
+        <Root level="${env:ROOT_LOG_LEVEL:-info}">
+            <AppenderRef ref="Console"/><AppenderRef ref="InfoFile"/>
+            <AppenderRef ref="WarnFile"/><AppenderRef ref="ErrorFile"/>
+        </Root>
+    </Loggers>
+</Configuration>

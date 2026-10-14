@@ -1,0 +1,40 @@
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+
+SELECT DISTINCT ?place ?name ?description ?coordinate ?image ?article ?areaLabel ?category
+WHERE {
+  ?place wdt:P17 wd:Q854;
+         wdt:P625 ?coordinate;
+         rdfs:label ?name.
+  FILTER(LANG(?name) = "en")
+  {
+    VALUES (?type ?category) {
+      (wd:Q839954 "ancient-ruins")
+      (wd:Q44539 "sacred-sites")
+      (wd:Q16970 "sacred-sites")
+      (wd:Q32815 "sacred-sites")
+      (wd:Q180987 "sacred-sites")
+      (wd:Q33506 "museums")
+      (wd:Q57821 "heritage-sites")
+    }
+    ?place wdt:P31/wdt:P279* ?type.
+  } UNION {
+    # Some landmarks are typed as settlements but carry a heritage designation.
+    ?place wdt:P1435 ?designation.
+    BIND("heritage-sites" AS ?category)
+  }
+  OPTIONAL { ?place schema:description ?description. FILTER(LANG(?description) = "en") }
+  OPTIONAL { ?place wdt:P18 ?image. }
+  OPTIONAL {
+    ?article schema:about ?place;
+             schema:isPartOf <https://en.wikipedia.org/>.
+  }
+  OPTIONAL {
+    ?place wdt:P131 ?area.
+    ?area rdfs:label ?areaLabel. FILTER(LANG(?areaLabel) = "en")
+  }
+}
+ORDER BY ?place ?category ?image ?areaLabel
+LIMIT 5000

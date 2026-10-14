@@ -1,0 +1,43 @@
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+
+SELECT DISTINCT ?province ?place ?name ?description ?coordinate ?image ?article
+                ?area ?areaLabel ?typeLabel ?designation ?heritageStatus ?capitalLabel ?districtLabel ?locatedInProvince
+WHERE {
+  # Start from this province's administrative descendants, including the province itself.
+  # Associated festivals/crafts can additionally link through location or indigenous-to.
+  ?place (wdt:P131|wdt:P276|wdt:P2341)* wd:__PROVINCE_ID__.
+  BIND(wd:__PROVINCE_ID__ AS ?province)
+  BIND(EXISTS { ?place (wdt:P131|wdt:P276)+ wd:__PROVINCE_ID__ } AS ?locatedInProvince)
+  ?place rdfs:label ?name. FILTER(LANG(?name) = "en")
+  OPTIONAL { ?place wdt:P625 ?coordinate. }
+  OPTIONAL { ?place schema:description ?description. FILTER(LANG(?description) = "en") }
+  OPTIONAL { ?place wdt:P18 ?image. }
+  OPTIONAL { ?place wdt:P1435 ?designation. }
+  OPTIONAL { ?place wdt:P3259 ?heritageStatus. }
+  OPTIONAL {
+    ?place wdt:P31 ?type.
+    ?type rdfs:label ?typeLabel. FILTER(LANG(?typeLabel) = "en")
+  }
+  OPTIONAL {
+    ?article schema:about ?place; schema:isPartOf <https://en.wikipedia.org/>.
+  }
+  OPTIONAL {
+    ?place wdt:P131 ?area.
+    ?area rdfs:label ?areaLabel. FILTER(LANG(?areaLabel) = "en")
+  }
+  OPTIONAL {
+    FILTER(?place = wd:__PROVINCE_ID__)
+    ?place wdt:P36 ?capital.
+    ?capital rdfs:label ?capitalLabel. FILTER(LANG(?capitalLabel) = "en")
+  }
+  OPTIONAL {
+    FILTER(?place = wd:__PROVINCE_ID__)
+    ?place wdt:P150 ?district.
+    ?district rdfs:label ?districtLabel. FILTER(LANG(?districtLabel) = "en")
+  }
+}
+ORDER BY DESC(?place = wd:__PROVINCE_ID__) ?place ?image ?typeLabel ?districtLabel
+LIMIT 5000

@@ -1,0 +1,400 @@
+{
+  "info": {
+    "_postman_id": "23f75fd8-7bd7-4c77-b748-b8ab6e36b206",
+    "name": "Rootly Questions API",
+    "description": "Two-user test flow for the authenticated Rootly question forum. Run the requests from top to bottom.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "userAEmail", "value": "amaya.forum@example.com" },
+    { "key": "userAPassword", "value": "RootlyTest123!" },
+    { "key": "userBEmail", "value": "dinuka.forum@example.com" },
+    { "key": "userBPassword", "value": "RootlyTest123!" },
+    { "key": "tokenA", "value": "" },
+    { "key": "tokenB", "value": "" },
+    { "key": "questionId", "value": "" },
+    { "key": "commentId", "value": "" },
+    { "key": "replyId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "1.1 Register User A - Amaya",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Amaya Perera\",\n  \"email\": \"{{userAEmail}}\",\n  \"phone\": \"0771234567\",\n  \"gender\": \"Female\",\n  \"password\": \"{{userAPassword}}\",\n  \"photoUrl\": \"https://example.com/amaya.jpg\",\n  \"district\": \"Colombo\",\n  \"languages\": [\"Sinhala\", \"English\"]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          }
+        },
+        {
+          "name": "1.2 Register User B - Dinuka",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dinuka Rathnayake\",\n  \"email\": \"{{userBEmail}}\",\n  \"phone\": \"0719876543\",\n  \"gender\": \"Male\",\n  \"password\": \"{{userBPassword}}\",\n  \"photoUrl\": \"https://example.com/dinuka.jpg\",\n  \"district\": \"Kandy\",\n  \"languages\": [\"Sinhala\", \"English\"]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          }
+        },
+        {
+          "name": "1.3 Login User A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login succeeded', () => pm.response.to.have.status(200));",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('tokenA', response.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userAEmail}}\",\n  \"password\": \"{{userAPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "1.4 Login User B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login succeeded', () => pm.response.to.have.status(200));",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('tokenB', response.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userBEmail}}\",\n  \"password\": \"{{userBPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Questions and Comments",
+      "item": [
+        {
+          "name": "2.1 User A Creates Question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Question created', () => pm.response.to.have.status(201));",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('questionId', response.data.id);",
+                  "pm.test('JWT user owns question', () => pm.expect(response.data.ownedByViewer).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"What is the correct way to walk around a stupa?\",\n  \"body\": \"A monk gently corrected me at Rankoth Vehera and I would like to understand the respectful custom.\",\n  \"location\": \"Polonnaruwa\",\n  \"placeId\": \"rankoth-vehera\",\n  \"category\": \"rituals-etiquette\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/questions"
+          }
+        },
+        {
+          "name": "2.2 User B Lists Top Questions",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions?sort=top&page=0&size=20"
+          }
+        },
+        {
+          "name": "2.3 Search and Filter Questions",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions?q=stupa&category=rituals-etiquette&sort=new&page=0&size=10"
+          }
+        },
+        {
+          "name": "2.4 User B Gets Question Detail",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}?commentSort=top"
+          }
+        },
+        {
+          "name": "2.5 User B Adds Top-Level Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Comment created', () => pm.response.to.have.status(201));",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('commentId', response.data.id);",
+                  "pm.test('Comment belongs to User B', () => pm.expect(response.data.author.name).to.eql('Dinuka Rathnayake'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Walk clockwise so that your right shoulder remains toward the stupa. It is the traditional respectful direction.\",\n  \"parentCommentId\": null\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}/comments"
+          }
+        },
+        {
+          "name": "2.6 User A Replies to User B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reply created', () => pm.response.to.have.status(201));",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('replyId', response.data.id);",
+                  "pm.test('Parent comment is correct', () => pm.expect(response.data.parentCommentId).to.eql(pm.collectionVariables.get('commentId')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Thank you. That explains why the walking path follows that direction.\",\n  \"parentCommentId\": \"{{commentId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}/comments"
+          }
+        },
+        {
+          "name": "2.7 Get Nested Thread - New Sort",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thread loaded', () => pm.response.to.have.status(200));",
+                  "const response = pm.response.json();",
+                  "pm.test('Top-level comment exists', () => pm.expect(response.data.comments.length).to.be.above(0));",
+                  "pm.test('Nested reply exists', () => pm.expect(response.data.comments[0].replies.length).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}?commentSort=new"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Votes and Bookmarks",
+      "item": [
+        {
+          "name": "3.1 User B Upvotes Question",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"value\": 1\n}" },
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}/vote"
+          }
+        },
+        {
+          "name": "3.2 User A Upvotes User B Comment",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"value\": 1\n}" },
+            "url": "{{baseUrl}}/api/v1/comments/{{commentId}}/vote"
+          }
+        },
+        {
+          "name": "3.3 User B Bookmarks Question",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}/bookmark"
+          }
+        },
+        {
+          "name": "3.4 User B Confirms Personal State",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Question loaded', () => pm.response.to.have.status(200));",
+                  "const response = pm.response.json();",
+                  "pm.test('User B vote is returned', () => pm.expect(response.data.viewerVote).to.eql(1));",
+                  "pm.test('User B bookmark is returned', () => pm.expect(response.data.bookmarked).to.eql(true));",
+                  "pm.test('User B is not owner', () => pm.expect(response.data.ownedByViewer).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}?commentSort=top"
+          }
+        },
+        {
+          "name": "3.5 User B Removes Question Vote",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"value\": 0\n}" },
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}/vote"
+          }
+        },
+        {
+          "name": "3.6 User B Removes Bookmark",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}/bookmark"
+          }
+        },
+        {
+          "name": "3.7 List Unanswered Questions",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions?sort=unanswered&page=0&size=20"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Negative Checks",
+      "item": [
+        {
+          "name": "4.1 Missing Token Returns 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Unauthorized', () => pm.response.to.have.status(401));"] }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions"
+          }
+        },
+        {
+          "name": "4.2 Invalid Vote Returns 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Bad request', () => pm.response.to.have.status(400));"] }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"value\": 2\n}" },
+            "url": "{{baseUrl}}/api/v1/questions/{{questionId}}/vote"
+          }
+        },
+        {
+          "name": "4.3 Missing Question Returns 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Not found', () => pm.response.to.have.status(404));"] }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/questions/000000000000000000000000"
+          }
+        }
+      ]
+    }
+  ]
+}
