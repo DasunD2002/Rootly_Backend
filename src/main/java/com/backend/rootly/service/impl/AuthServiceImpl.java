@@ -12,7 +12,7 @@ import com.backend.rootly.service.security.JwtService;
 import com.backend.rootly.utility.MessageConstant;
 import com.backend.rootly.utility.ResponseCode;
 import com.backend.rootly.utility.ResponseGenerator;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.backend.rootly.dto.GoogleUserData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -121,55 +121,15 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     @Transactional
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     public ResponseEntity<Object> googleAuth(String idToken, List<String> preferredLanguages, Locale locale) {
-        Payload payload = googleTokenVerifierService.verify(idToken);
-        if (payload == null) {
+        GoogleUserData googleUser = googleTokenVerifierService.verify(idToken);
+        if (googleUser == null) {
             return responseGenerator.generateErrorResponse(
                     idToken, HttpStatus.UNAUTHORIZED,
                     ResponseCode.GOOGLE_TOKEN_INVALID, MessageConstant.GOOGLE_TOKEN_INVALID, locale);
         }
 
-        String email = payload.getEmail();
-        String name = (String) payload.get("name");
-        String pictureUrl = (String) payload.get("picture");
-
-        Optional<UserReg> existingUser = userRepository.findByEmail(email);
-
-        UserReg user;
-        if (existingUser.isPresent()) {
-            // Existing user — just update profile picture if missing
-            user = existingUser.get();
-            if (user.getPhotoUrl() == null && pictureUrl != null) {
-                user.setPhotoUrl(pictureUrl);
-                user = userRepository.save(user);
-            }
-            if (log.isInfoEnabled()) {
-                log.info("Google login for existing user: {}", email);
-            }
-        } else {
-            // New user — auto-register with Google profile data
-            user = new UserReg();
-            user.setName(name != null ? name : email);
-            user.setEmail(email);
-            // Generate a secure random password; the user can never use it directly
-            user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-            user.setPhotoUrl(pictureUrl);
-            user.setLanguages(preferredLanguages != null && !preferredLanguages.isEmpty()
-                    ? preferredLanguages : List.of("English"));
-            user.setRole("USER");
-            user.setVerificationStatus("VERIFIED"); // Google already verified the email
-            user.setFollowerCount(0);
-            user.setFollowingCount(0);
-            user.setIsOtpVerified(true); // Email verified by Google
-            user.setProfileVisibility("PUBLIC");
-            user.setShowActivity(true);
-            user = userRepository.save(user);
-            if (log.isInfoEnabled()) {
-                log.info("Auto-registered new Google user: {}", email);
-            }
-        }
-
+        UserReg user = resolveGoogleUser(googleUser, preferredLanguages);
         String jwtToken = jwtService.generateToken(user.getEmail());
 
         LoginResponseDTO responseDTO = LoginResponseDTO.builder()
@@ -183,5 +143,44 @@ public class AuthServiceImpl implements AuthService {
 
         return responseGenerator.generateSuccessResponse(idToken, HttpStatus.OK,
                 ResponseCode.GOOGLE_AUTH_SUCCESS, MessageConstant.GOOGLE_AUTH_SUCCESS, locale, responseDTO);
+    }
+
+    private UserReg resolveGoogleUser(GoogleUserData googleUser, List<String> preferredLanguages) {
+        Optional<UserReg> existingUser = userRepository.findByEmail(googleUser.getEmail());
+        if (existingUser.isPresent()) {
+            UserReg user = existingUser.get();
+            if (user.getPhotoUrl() == null && googleUser.getPictureUrl() != null) {
+                user.setPhotoUrl(googleUser.getPictureUrl());
+                user = userRepository.save(user);
+            }
+            if (log.isInfoEnabled()) {
+                log.info("Google login for existing user: {}", googleUser.getEmail());
+            }
+            return user;
+        }
+        return createNewGoogleUser(googleUser, preferredLanguages);
+    }
+
+    private UserReg createNewGoogleUser(GoogleUserData googleUser, List<String> preferredLanguages) {
+        UserReg user = new UserReg();
+        String name = googleUser.getName();
+        user.setName(name != null ? name : googleUser.getEmail());
+        user.setEmail(googleUser.getEmail());
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setPhotoUrl(googleUser.getPictureUrl());
+        user.setLanguages(preferredLanguages != null && !preferredLanguages.isEmpty()
+                ? preferredLanguages : List.of("English"));
+        user.setRole("USER");
+        user.setVerificationStatus("VERIFIED");
+        user.setFollowerCount(0);
+        user.setFollowingCount(0);
+        user.setIsOtpVerified(true);
+        user.setProfileVisibility("PUBLIC");
+        user.setShowActivity(true);
+        UserReg saved = userRepository.save(user);
+        if (log.isInfoEnabled()) {
+            log.info("Auto-registered new Google user: {}", googleUser.getEmail());
+        }
+        return saved;
     }
 }
