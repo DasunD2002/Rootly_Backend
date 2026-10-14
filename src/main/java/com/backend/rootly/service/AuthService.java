@@ -11,4 +11,6 @@ public interface AuthService {
     ResponseEntity<Object> register(UserRegister request, Locale locale);
 
     ResponseEntity<Object> authenticate(UserLogin request, Locale locale);
+
+    ResponseEntity<Object> googleAuth(String idToken, java.util.List<String> preferredLanguages, Locale locale);
 }

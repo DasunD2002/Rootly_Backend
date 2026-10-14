@@ -22,6 +22,8 @@ public class MessageConstant {
     public static final String USER_NOT_FOUND = "val.user.not.found";
     public static final String INVALID_CREDENTIALS = "val.auth.invalid.credentials";
     public static final String EMAIL_ALREADY_EXISTS = "val.user.email.already.exists";
+    public static final String GOOGLE_AUTH_SUCCESS = "val.auth.google.success";
+    public static final String GOOGLE_TOKEN_INVALID = "val.auth.google.token.invalid";
 
     /*--------------- Capsule Messages ---------------*/
     public static final String CAPSULE_CREATE_SUCCESS = "val.capsule.create.success";
